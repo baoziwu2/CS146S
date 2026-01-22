@@ -70,7 +70,23 @@ TOOL_REGISTRY: Dict[str, Callable[..., str]] = {
 # ==========================
 
 # TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """
+You are a tool-calling agent.
+
+You MUST respond with exactly one valid JSON object and NOTHING else (no prose, no markdown, no code fences).
+
+Schema:
+{
+  "tool": "<tool_name>",
+  "args": { ... }
+}
+
+Task:
+Call the tool named "output_every_func_return_type" to analyze the current script file.
+Set args.file_path to an empty string "" (this will be treated as the current file by the executor).
+
+Return only the JSON object.
+"""
 
 
 def resolve_path(p: str) -> str:

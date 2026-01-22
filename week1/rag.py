@@ -37,8 +37,13 @@ QUESTION = (
 
 
 # TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
-
+YOUR_SYSTEM_PROMPT = """
+    You are a careful coding assistant.
+    Use ONLY the information provided in the Context to complete the task.
+    Do not assume or invent any details not explicitly stated in the Context.
+    When it comes to authentication, you must provide X-API-Key and use the function requests.get.\n
+    Output MUST be a single fenced Python code block and nothing else.
+"""
 
 # For this simple example
 # For this coding task, validate by required snippets rather than exact string
@@ -52,12 +57,11 @@ REQUIRED_SNIPPETS = [
 
 
 def YOUR_CONTEXT_PROVIDER(corpus: List[str]) -> List[str]:
-    """TODO: Select and return the relevant subset of documents from CORPUS for this task.
+    """DONE: Select and return the relevant subset of documents from CORPUS for this task.
 
     For example, return [] to simulate missing context, or [corpus[0]] to include the API docs.
     """
     return []
-
 
 def make_user_prompt(question: str, context_docs: List[str]) -> str:
     if context_docs:

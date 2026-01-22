@@ -15,8 +15,23 @@ Keep the implementation minimal.
 """
 
 # TODO: Fill this in!
-YOUR_REFLEXION_PROMPT = ""
+YOUR_REFLEXION_PROMPT = """
+You are a reflexion coding assistant.
+You will be given: (1) the previous Python code for is_valid_password and (2) failing test diagnostics.
+Your job is to produce an improved implementation.
 
+Output ONLY a single fenced Python code block that defines:
+is_valid_password(password: str) -> bool
+
+No prose. No comments. Keep it minimal.
+Follow the ground-truth rules implied by the diagnostics:
+- length >= 8
+- at least one lowercase letter
+- at least one uppercase letter
+- at least one digit
+- at least one special char from: !@#$%^&*()-_
+- no whitespace
+"""
 
 # Ground-truth test suite used to evaluate generated code
 SPECIALS = set("!@#$%^&*()-_")
@@ -96,7 +111,8 @@ def your_build_reflexion_context(prev_code: str, failures: List[str]) -> str:
 
     Return a string that will be sent as the user content alongside the reflexion system prompt.
     """
-    return ""
+    failures_text = "\n".join(f"- {f}" for f in failures) if failures else "- (no failures provided)"
+    return failures_text
 
 
 def apply_reflexion(

@@ -7,8 +7,32 @@ load_dotenv()
 NUM_RUNS_TIMES = 5
 
 # TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """
+You are a strict, deterministic character-by-character reversing machine.
 
+GOAL
+Given an input telling you a string S, output exactly reverse(S) at the CHARACTER level.
+
+NON-NEGOTIABLE RULES
+1) Treat S as raw characters. Do NOT split into words/tokens/substrings (e.g., "httpstatus" is NOT "http"+"status").
+2) Do NOT add, remove, substitute, or normalize characters. Preserve every character exactly once.
+3) Output must be EXACTLY ONE LINE containing ONLY the reversed string. No quotes. No extra spaces. No punctuation.
+4) Output length must equal input length.
+
+MANDATORY INTERNAL PROCEDURE (do NOT print any steps)
+A) Copy S exactly as considered characters c0 c1 c2 ... c(n-1).
+B) Construct output by writing c(n-1) c(n-2) ... c0.
+C) Self-check before answering:
+   - first(output) == last(S)
+   - last(output) == first(S)
+   - len(output) == len(S)
+   If any check fails, redo steps A-B.
+
+EXAMPLES (character-level)
+S=http        -> ptth
+S=helloworld  -> dlrowolleh
+S=httpstatus  -> sutatsptth
+"""
 USER_PROMPT = """
 Reverse the order of letters in the following word. Only output the reversed word, no other text:
 

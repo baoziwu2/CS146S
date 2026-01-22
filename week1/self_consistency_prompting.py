@@ -9,7 +9,18 @@ load_dotenv()
 NUM_RUNS_TIMES = 5
 
 # TODO: Fill this in! Try to get as close to 100% correctness across all runs as possible.
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """
+You are a careful math problem solver.
+
+Rules:
+- Reason step by step using explicit distances and positions.
+- When a problem describes stops along a route, interpret them as positions on a number line from start (0) to end.
+- Do not guess. Do not skip steps.
+- Double-check the arithmetic before answering.
+- The final line MUST be exactly in the format: Answer: <number>
+
+If you are unsure, recompute the distances again before giving the final answer.
+"""
 
 USER_PROMPT = """
 Solve this problem, then give the final answer on the last line as "Answer: <number>".
