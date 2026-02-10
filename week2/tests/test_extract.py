@@ -6,11 +6,18 @@ from ..app.services import extract
 from ..app.services.extract import extract_action_items, extract_action_items_llm
 from typing import Any, Callable
 
-def fake_chat_factory(return_items: list[str]) -> Callable[[dict[str, Any]], dict[str, Any]]:
-    def fake_chat(messages: list[dict[str, Any]]) -> dict[str, Any]:
+def fake_chat_factory(return_items: list[str]) -> Callable:
+    def fake_chat(
+        model: str,
+        messages: list[dict[str, Any]],
+        stream: bool = False,
+        format: dict[str, Any] | None = None,
+        options: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        # 返回符合 ActionItemsList schema 的 JSON 格式
         return {
             "message": {
-                "content": json.dumps(return_items),
+                "content": json.dumps({"items": return_items}),
             },
         }
     return fake_chat

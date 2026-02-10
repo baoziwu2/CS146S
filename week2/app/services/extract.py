@@ -7,6 +7,7 @@ import json
 from typing import Any
 from ollama import chat
 from dotenv import load_dotenv
+from pydantic import BaseModel
 
 load_dotenv()
 
@@ -66,6 +67,11 @@ def extract_action_items(text: str) -> List[str]:
     return unique
 
 
+class ActionItemsList(BaseModel):
+    """Pydantic model for structured action items extraction."""
+    items: List[str]
+
+
 def extract_action_items_llm(text: str) -> List[str]:
     text = text.strip()
     if not text:
@@ -75,26 +81,28 @@ def extract_action_items_llm(text: str) -> List[str]:
     if not model:
         raise ValueError("OLLAMA_MODEL environment variable is not set")
     
-
-    schema : dict[str, Any] = {
-        "type": "array",
-        "items": {
-            "type": "string",
-        },
-    }
+    schema = ActionItemsList.model_json_schema()
 
     response = chat(
         model=model,
         messages=[
-            {"role": "system", "content": "You are a helpful assistant that extracts action items from text. Return a JSON array of strings, each string is one action item."},
-            {"role": "user", "content": f"Extract action items from the following text:\n\n{text}"},
+            {
+                "role": "system",
+                "content": "You are a helpful assistant that extracts action items from text. Return as JSON."
+            },
+            {
+                "role": "user",
+                "content": f"Extract action items from the following text and return as JSON:\n\n{text}"
+            },
         ],
         stream=False,
         format=schema,
+        options={"temperature": 0},  # 设置 temperature 为 0 以获得更确定性的输出
     )
 
     content = response["message"]["content"]
-    return json.loads(content)
+    action_items = ActionItemsList.model_validate_json(content)
+    return action_items.items
 
 def _looks_imperative(sentence: str) -> bool:
     words = re.findall(r"[A-Za-z']+", sentence)
