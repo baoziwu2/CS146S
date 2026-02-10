@@ -1,8 +1,29 @@
+import json
 import os
 import pytest
 
-from ..app.services.extract import extract_action_items
+from ..app.services import extract
+from ..app.services.extract import extract_action_items, extract_action_items_llm
+from typing import Any, Callable
 
+def fake_chat_factory(return_items: list[str]) -> Callable[[dict[str, Any]], dict[str, Any]]:
+    def fake_chat(messages: list[dict[str, Any]]) -> dict[str, Any]:
+        return {
+            "message": {
+                "content": json.dumps(return_items),
+            },
+        }
+    return fake_chat
+
+def test_extract_action_items_llm_basic(monkeypatch):
+    monkeypatch.setenv("OLLAMA_MODEL", "dummy-model")
+    fake_chat = fake_chat_factory(["Do A", "Do B"])
+    monkeypatch.setattr(extract, "chat", fake_chat)
+
+    text = "Some meeting notes about tasks."
+    items = extract.extract_action_items_llm(text)
+
+    assert items == ["Do A", "Do B"]
 
 def test_extract_bullets_and_checkboxes():
     text = """
@@ -17,3 +38,28 @@ def test_extract_bullets_and_checkboxes():
     assert "Set up database" in items
     assert "implement API extract endpoint" in items
     assert "Write tests" in items
+
+def test_extract_action_items_llm_empty_input(monkeypatch):
+    # 空输入直接返回 []
+    monkeypatch.setenv("OLLAMA_MODEL", "dummy-model")
+    # 即使不打补丁 chat，也不会被调用，因为函数直接返回
+    items = extract.extract_action_items_llm("")
+    assert items == []
+
+
+def test_extract_action_items_llm_with_bullets(monkeypatch):
+    monkeypatch.setenv("OLLAMA_MODEL", "dummy-model")
+
+    text = """
+    - [ ] Set up database
+    todo: write documentation
+    """.strip()
+
+    fake_chat = fake_chat_factory(
+        ["Set up database", "write documentation"]
+    )
+    monkeypatch.setattr(extract, "chat", fake_chat)
+
+    items = extract.extract_action_items_llm(text)
+    assert "Set up database" in items
+    assert "write documentation" in items

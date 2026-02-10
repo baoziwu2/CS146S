@@ -24,15 +24,42 @@
     <div class="row">
       <label class="row"><input id="save_note" type="checkbox" checked /> Save as note</label>
       <button id="extract">Extract</button>
+      <button id="extract_llm">Extract LLM</button>
+      <button id="list_notes">List Notes</button>
     </div>
 
     <div class="items" id="items"></div>
+    <div class="items" id="notes"></div>
 
     <script>
       const $ = (sel) => document.querySelector(sel);
       const itemsEl = $('#items');
-      const btn = $('#extract');
-      btn.addEventListener('click', async () => {
+      const notesEl = $('#notes');
+
+      async function renderItemsFromResponse(res) {
+        if (!res.ok) throw new Error('Request failed');
+        const data = await res.json();
+        if (!data.items || data.items.length === 0) {
+          itemsEl.innerHTML = '<p class="muted">No action items found.</p>';
+          return;
+        }
+        itemsEl.innerHTML = data.items.map(it => (
+          `<div class="item"><input type="checkbox" data-id="${it.id}" /> <span>${it.text}</span></div>`
+        )).join('');
+        itemsEl.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+          cb.addEventListener('change', async (e) => {
+            const id = e.target.getAttribute('data-id');
+            await fetch(`/action-items/${id}/done`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ done: e.target.checked }),
+            });
+          });
+        });
+      }
+
+      // Heuristic extract
+      $('#extract').addEventListener('click', async () => {
         const text = $('#text').value;
         const save = $('#save_note').checked;
         itemsEl.textContent = 'Extracting...';
@@ -42,8 +69,31 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text, save_note: save }),
           });
-          if (!res.ok) throw new Error('Request failed');
+          await renderItemsFromResponse(res);
+        } catch (err) {
+          console.error(err);
+          itemsEl.textContent = 'Error extracting items';
+        }
+      });
+
+      // LLM-powered extract
+      $('#extract_llm').addEventListener('click', async () => {
+        const text = $('#text').value;
+        const save = $('#save_note').checked;
+        itemsEl.textContent = 'Extracting with LLM...';
+        try {
+          const res = await fetch('/action-items/extract-llm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, save_note: save }),
+          });
+          // 调试：打印响应状态和原始数据
+          console.log('LLM Extract Response Status:', res.status);
           const data = await res.json();
+          console.log('LLM Extract Response Data:', data);
+          console.log('Items count:', data.items?.length || 0);
+          
+          if (!res.ok) throw new Error('Request failed');
           if (!data.items || data.items.length === 0) {
             itemsEl.innerHTML = '<p class="muted">No action items found.</p>';
             return;
@@ -62,11 +112,30 @@
             });
           });
         } catch (err) {
-          console.error(err);
-          itemsEl.textContent = 'Error extracting items';
+          console.error('LLM Extract Error:', err);
+          itemsEl.textContent = 'Error extracting items with LLM';
         }
       });
 
+      // List all notes
+      $('#list_notes').addEventListener('click', async () => {
+        notesEl.textContent = 'Loading notes...';
+        try {
+          const res = await fetch('/notes');
+          if (!res.ok) throw new Error('Request failed');
+          const data = await res.json();
+          if (!Array.isArray(data) || data.length === 0) {
+            notesEl.innerHTML = '<p class="muted">No notes found.</p>';
+            return;
+          }
+          notesEl.innerHTML = data.map(note => (
+            `<div class="item"><span class="muted">#${note.id}</span> <span>${note.content}</span></div>`
+          )).join('');
+        } catch (err) {
+          console.error(err);
+          notesEl.textContent = 'Error loading notes';
+        }
+      });
     </script>
   </body>
   </html>

@@ -66,6 +66,36 @@ def extract_action_items(text: str) -> List[str]:
     return unique
 
 
+def extract_action_items_llm(text: str) -> List[str]:
+    text = text.strip()
+    if not text:
+        return []
+    
+    model = os.getenv("OLLAMA_MODEL")
+    if not model:
+        raise ValueError("OLLAMA_MODEL environment variable is not set")
+    
+
+    schema : dict[str, Any] = {
+        "type": "array",
+        "items": {
+            "type": "string",
+        },
+    }
+
+    response = chat(
+        model=model,
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant that extracts action items from text. Return a JSON array of strings, each string is one action item."},
+            {"role": "user", "content": f"Extract action items from the following text:\n\n{text}"},
+        ],
+        stream=False,
+        format=schema,
+    )
+
+    content = response["message"]["content"]
+    return json.loads(content)
+
 def _looks_imperative(sentence: str) -> bool:
     words = re.findall(r"[A-Za-z']+", sentence)
     if not words:
