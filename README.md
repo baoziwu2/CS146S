@@ -10,7 +10,7 @@ Updating...
 
 - **Assignments:** Complete source code for all course projects.
 - **Solutions:** My personal approach and walkthroughs for the problem sets.
-- **Notes:** Insightful summaries and key takeaways from the lectures and readings.
+- **Notes:** Summaries and takeaways from the lectures and readings.
 
 ## Setup & Installation
 
