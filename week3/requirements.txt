@@ -1,0 +1,21 @@
+# MCP Server dependencies
+mcp>=1.0.0
+
+# Google API dependencies
+google-api-python-client>=2.100.0
+google-auth>=2.25.0
+google-auth-oauthlib>=1.2.0
+
+# Data validation
+pydantic>=2.5.0
+
+# Utilities
+python-dotenv>=1.0.0
+
+# Testing
+pytest>=7.4.0
+pytest-mock>=3.12.0
+
+# Logging (optional, can use standard logging)
+structlog>=23.2.0
+
