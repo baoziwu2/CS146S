@@ -31,4 +31,3 @@
 ## 7) Docs drift check (manual for now)
 - Create/maintain a simple `API.md` describing endpoints and payloads
 - After each change, verify docs match actual OpenAPI (`/openapi.json`)
-

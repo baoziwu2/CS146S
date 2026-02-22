@@ -11,12 +11,12 @@
   * **MCP Server**（工具注册与协议处理；MCP 规范参考：[https://modelcontextprotocol.io/specification/](https://modelcontextprotocol.io/specification/)）
     * 负责处理 MCP 协议通信（STDIO 模式优先），注册并暴露工具给客户端
     * 接收工具调用请求，验证参数，调用底层 Gmail Client，返回结构化结果
-  
+
   * **Gmail Client**（对 Gmail REST API 的薄封装：messages.list/messages.get）
     * `list_messages`：调用 [messages.list](https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages/list) API，支持 query 搜索、分页（nextPageToken）、结果数量限制
     * `get_message`：调用 [messages.get](https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages/get) API，获取邮件完整详情（headers、body_text、body_html）
     * 封装 HTTP 请求、重试逻辑、错误映射、超时控制
-  
+
   * **Auth 模块**（OAuth2 token 获取/刷新/持久化：[https://developers.google.com/identity/protocols/oauth2](https://developers.google.com/identity/protocols/oauth2)）
     * **重要约束**：MCP Server 以 STDIO 后台进程运行时**无法弹出浏览器窗口**（`flow.run_local_server()` 在无头环境下会阻塞或失败），因此采用**"预授权 + token 复用"两阶段方案**：
       * **阶段 A（一次性，手动）**：提供独立的 CLI 脚本 `auth_cli.py`，开发者在有浏览器的终端中手动运行一次，完成 OAuth2 授权流程，将 refresh_token 持久化到 `.token.json`
@@ -24,7 +24,7 @@
     * Token 安全存储（本地文件 `.token.json`，加入 `.gitignore`）
     * 自动刷新过期 access_token（基于 refresh_token），确保 API 调用可用性
     * 启动时若 `.token.json` 不存在或 refresh_token 失效，输出明确错误提示（指引用户运行 `python auth_cli.py`），而非尝试弹窗
-  
+
   * **工具层**（gmail_search_messages / gmail_get_message）
     * `gmail_search_messages`：核心搜索工具，支持 Gmail query 语法（[https://support.google.com/mail/answer/7190](https://support.google.com/mail/answer/7190)），处理分页、结果补全、去重
     * `gmail_get_message`：按 message_id 获取邮件详情，支持不同格式（full/metadata）
@@ -49,11 +49,11 @@
      * 支持可选参数组合：`newer_than_days`（转换为 `newer_than:Nd`）、`label_ids`（转换为 `label:INBOX` 等）
      * 返回结构化结果：id、thread_id、from_email、subject、date、snippet
      * 对前 K 条结果（例如前 10 条）自动补全 metadata（调用 messages.get 获取 subject/from/date），保证输出有意义
-  
+
   2. **Tool: `gmail_get_message`** 按 message_id 调用 messages.get（[https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages/get](https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages/get)）获取详情（headers + body_text/body_html 可选）
      * 支持 `format` 参数：`full`（完整内容）或 `metadata`（仅 headers + snippet）
      * 返回结构化 JSON：headers（from/to/subject/date 等）、body_text（纯文本）、body_html（可选）
-  
+
   3. **分页处理**（messages.list 的 nextPageToken），至少可配置 max_results，必要时支持 next_page_token 或内部自动翻页到上限
      * `max_results` 参数控制最终返回数量上限（建议范围 1-50，默认 10）
      * 内部自动处理分页循环：当结果超过单页限制时，使用 nextPageToken 继续拉取，直到达到 max_results 或没有更多结果
@@ -403,27 +403,27 @@ class GetMessageParams(BaseModel):
      * 测试用例：`query="from:test"` + `newer_than_days=7` → 应生成 `"from:test newer_than:7d"`
      * 测试用例：`query="subject:meeting"` + `label_ids=["INBOX", "STARRED"]` → 应生成 `"subject:meeting label:INBOX label:STARRED"`
      * 测试用例：空 query + `newer_than_days=30` → 应生成 `"newer_than:30d"`
-  
+
   2. **分页正确性**：模拟多页返回（nextPageToken；list 文档：[https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages/list](https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages/list)），确保最多拉到 max_results，且不会死循环
      * 模拟场景：第 1 页返回 10 条 + nextPageToken，第 2 页返回 5 条（无 nextPageToken），max_results=15 → 应返回 15 条
      * 模拟场景：第 1 页返回 10 条 + nextPageToken，第 2 页返回 10 条 + nextPageToken，max_results=15 → 应返回 15 条（停止分页）
      * 模拟场景：分页次数限制（最多 10 页），防止无限循环
-  
+
   3. **去重正确性**：跨页重复 id 时只保留一次，顺序稳定
      * 模拟场景：第 1 页返回 id=[1,2,3]，第 2 页返回 id=[2,3,4] → 应返回 [1,2,3,4]（去重且保持顺序）
-  
+
   4. **空结果**：list 返回空 messages 字段时返回空数组，并给出可行动建议字段（例如 hint）
      * 模拟场景：messages.list 返回 `{"messages": []}` → 应返回 `[]` 并包含 hint 字段提示"尝试调整搜索条件"
-  
+
   5. **补全策略**：只对前 K 条做 get(metadata)（get 文档：[https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages/get](https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages/get)）；失败时降级（仍返回 id/threadId）
      * 模拟场景：搜索返回 20 条，K=10 → 应只对前 10 条调用 get_message
      * 模拟场景：前 3 条 get_message 失败 → 应返回 id/threadId，其余 7 条正常补全
-  
+
   6. **限流/重试**：模拟 429/503，验证退避重试次数与最终错误信息
      * 模拟场景：第 1 次调用返回 429，第 2 次成功 → 应重试 1 次后成功
      * 模拟场景：连续 3 次返回 429 → 应重试 3 次后返回 rate_limited 错误
      * 模拟场景：返回 503 → 应重试 2 次后返回 transient 错误
-  
+
   7. **输入校验**：query 为空、max_results 越界、message_id 非法等应在调用前失败
      * 测试用例：`query=""` → 应抛出 ValidationError
      * 测试用例：`max_results=100` → 应抛出 ValidationError（超过上限 50）
@@ -672,4 +672,3 @@ class GetMessageParams(BaseModel):
 * Relevant standards
 
   * **OAuth 2.0**（概览在 Google OAuth2 文档中已说明：[https://developers.google.com/identity/protocols/oauth2](https://developers.google.com/identity/protocols/oauth2)）
-

@@ -363,4 +363,3 @@ poetry run uvicorn week2.app.main:app --reload --port 8001
 ---
 
 **注意**：使用 LLM 提取功能需要本地运行 Ollama 服务。确保在运行应用前已正确配置 Ollama 环境。
-

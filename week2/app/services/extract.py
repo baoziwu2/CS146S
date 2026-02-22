@@ -3,10 +3,9 @@ from __future__ import annotations
 import os
 import re
 from typing import List
-import json
-from typing import Any
-from ollama import chat
+
 from dotenv import load_dotenv
+from ollama import chat
 from pydantic import BaseModel
 
 load_dotenv()
@@ -69,6 +68,7 @@ def extract_action_items(text: str) -> List[str]:
 
 class ActionItemsList(BaseModel):
     """Pydantic model for structured action items extraction."""
+
     items: List[str]
 
 
@@ -76,11 +76,11 @@ def extract_action_items_llm(text: str) -> List[str]:
     text = text.strip()
     if not text:
         return []
-    
+
     model = os.getenv("OLLAMA_MODEL")
     if not model:
         raise ValueError("OLLAMA_MODEL environment variable is not set")
-    
+
     schema = ActionItemsList.model_json_schema()
 
     response = chat(
@@ -88,11 +88,11 @@ def extract_action_items_llm(text: str) -> List[str]:
         messages=[
             {
                 "role": "system",
-                "content": "You are a helpful assistant that extracts action items from text. Return as JSON."
+                "content": "You are a helpful assistant that extracts action items from text. Return as JSON.",
             },
             {
                 "role": "user",
-                "content": f"Extract action items from the following text and return as JSON:\n\n{text}"
+                "content": f"Extract action items from the following text and return as JSON:\n\n{text}",
             },
         ],
         stream=False,
@@ -103,6 +103,7 @@ def extract_action_items_llm(text: str) -> List[str]:
     content = response["message"]["content"]
     action_items = ActionItemsList.model_validate_json(content)
     return action_items.items
+
 
 def _looks_imperative(sentence: str) -> bool:
     words = re.findall(r"[A-Za-z']+", sentence)

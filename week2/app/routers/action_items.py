@@ -1,32 +1,37 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException
-
 from pydantic import BaseModel
 
 from .. import db
 from ..services.extract import extract_action_items, extract_action_items_llm
 
+
 class ExtractRequest(BaseModel):
     text: str
     save_note: bool = False
+
 
 class ExtractResponseItem(BaseModel):
     id: int
     text: str
 
+
 class ExtractResponse(BaseModel):
     note_id: int | None
     items: List[ExtractResponseItem]
 
+
 class MarkDoneRequest(BaseModel):
     done: bool
+
 
 class MarkDoneResponse(BaseModel):
     id: int
     done: bool
+
 
 router = APIRouter(prefix="/action-items", tags=["action-items"])
 
@@ -44,8 +49,7 @@ def extract(payload: ExtractRequest) -> ExtractResponse:
     items = extract_action_items(text)
     ids = db.insert_action_items(items, note_id=note_id)
     return ExtractResponse(
-        note_id=note_id,
-        items=[ExtractResponseItem(id=i, text=t) for i, t in zip(ids, items)]
+        note_id=note_id, items=[ExtractResponseItem(id=i, text=t) for i, t in zip(ids, items)]
     )
 
 
@@ -63,6 +67,7 @@ def extract_llm(payload: ExtractRequest) -> ExtractResponse:
         items = extract_action_items_llm(text)
         # 调试日志：打印提取到的 items
         import logging
+
         logger = logging.getLogger(__name__)
         logger.info(f"LLM extracted {len(items)} items: {items}")
     except Exception as exc:  # Fallback to heuristic extractor on failure
@@ -70,11 +75,11 @@ def extract_llm(payload: ExtractRequest) -> ExtractResponse:
 
     ids = db.insert_action_items(items, note_id=note_id)
     response = ExtractResponse(
-        note_id=note_id,
-        items=[ExtractResponseItem(id=i, text=t) for i, t in zip(ids, items)]
+        note_id=note_id, items=[ExtractResponseItem(id=i, text=t) for i, t in zip(ids, items)]
     )
     # 调试日志：打印响应
     import logging
+
     logger = logging.getLogger(__name__)
     logger.info(f"Returning response with {len(response.items)} items")
     return response
@@ -91,5 +96,3 @@ def mark_done(action_item_id: int, payload: MarkDoneRequest) -> MarkDoneResponse
     done = payload.done
     db.mark_action_item_done(action_item_id, done)
     return MarkDoneResponse(id=action_item_id, done=done)
-
-

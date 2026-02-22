@@ -61,5 +61,3 @@ cd week7 && make lint
 ## Configuration
 
 Copy `.env.example` to `.env` (in `week7/`) to override defaults like the database path.
-
-

@@ -27,6 +27,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Compatibility with FastAPI lifespan events; keep on_event for simplicity here
 @app.on_event("startup")
 def startup_event() -> None:
@@ -42,5 +43,3 @@ async def root() -> FileResponse:
 # Routers
 app.include_router(notes_router.router)
 app.include_router(action_items_router.router)
-
-

@@ -11,4 +11,3 @@ Create new database models with relationships and update the application to supp
 
 ## Task 4: Improve tests for pagination and sorting
 Enhance test coverage for pagination and sorting functionality across the application.
-

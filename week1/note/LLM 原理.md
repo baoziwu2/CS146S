@@ -9,7 +9,7 @@
 LLM 的数据集通常非常大，[FineWeb]([FineWeb: decanting the web for the finest text data at scale - a Hugging Face Space by HuggingFaceFW](https://huggingface.co/spaces/HuggingFaceFW/blogpost-fineweb-v1)) 大概有 44TB，起点通常是 common crawl
 除此之外还要对数据预处理，过滤一些不合适网站的域名（URL filtering），从 HTML 里抽取正文、去除导航/样式/脚本等（Text extraction）
 #### Tokenization
-Token 是一种有效减少文本长度的编码，对文本跑 Byte Pair Encoding 得到，大概是迭代合并最常见的 token 对以生成新 token 
+Token 是一种有效减少文本长度的编码，对文本跑 Byte Pair Encoding 得到，大概是迭代合并最常见的 token 对以生成新 token
 [查看不同 LLM 的编码方式](https://tiktokenizer.vercel.app/)
 因为 LLM 的 IO 单位不是字符而是 token，所以在面对字符串相关问题时幻觉很多（经典 strawberry 有几个 r）
 #### 神经网络训练
@@ -40,7 +40,7 @@ Token 是一种有效减少文本长度的编码，对文本跑 Byte Pair Encodi
     例如设计对话式提示词的智能助手来回答问题
 
 ### Post-training
-### Supervised Fine-tuning(SFT) 监督式微调 
+### Supervised Fine-tuning(SFT) 监督式微调
 会给模型查看大量的助手式文本，使得模型更像一个助手。
 另外模型强到一定程度后，会反过来参与数据生成和评测
 训练完成后，得到的就是常见的一些模型

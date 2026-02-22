@@ -13,7 +13,7 @@ Name: **TODO** \
 SUNet ID: **TODO** \
 Citations: **TODO**
 
-This assignment took me about **TODO** hours to do. 
+This assignment took me about **TODO** hours to do.
 
 
 ## YOUR RESPONSES
@@ -36,7 +36,7 @@ e. How you used the automation (what pain point it resolves or accelerates)
 
 
 
-### Automation B: Multi‑agent workflows in Warp 
+### Automation B: Multi‑agent workflows in Warp
 
 a. Design of each automation, including goals, inputs/outputs, steps
 > TODO
@@ -69,4 +69,3 @@ d. (if applicable) Multi‑agent notes: roles, coordination strategy, and concur
 
 e. How you used the automation (what pain point it resolves or accelerates)
 > TODO
-

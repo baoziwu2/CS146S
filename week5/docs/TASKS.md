@@ -1,4 +1,4 @@
-# Tasks for Repo 
+# Tasks for Repo
 
 ## 1) Migrate frontend to Vite + React (complex)
 - Scaffold a Vite + React app in `week5/frontend/` (or a subfolder like `week5/frontend/ui/`).

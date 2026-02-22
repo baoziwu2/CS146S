@@ -15,5 +15,3 @@ lint:
 
 seed:
 	PYTHONPATH=. python -c "from backend.app.db import apply_seed_if_needed; apply_seed_if_needed()"
-
-

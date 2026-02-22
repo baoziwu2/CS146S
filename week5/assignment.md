@@ -63,7 +63,7 @@ make format
 make lint
 ```
 
-## Part I: Build Your Automation (Choose 2 or more) 
+## Part I: Build Your Automation (Choose 2 or more)
 Select tasks from `week5/docs/TASKS.md` to implement. Your implementation must leverage Warp in both of the following ways (more details below):
 
 - A) Use Warp Drive features — such as saved prompts, rules, or MCP servers.
@@ -84,13 +84,13 @@ Create one or more shareable Warp Drive prompts, rules, or MCP server integratio
 >*Tips: keep workflows focused, pass arguments, make them idempotent, and prefer headless/non‑interactive steps where possible.*
 
 ### B) Multi‑agent workflows in Warp (REQUIRED: at least one)
-Run a multi‑agent session where separate agents in different Warp tabs handle independent tasks concurrently. 
+Run a multi‑agent session where separate agents in different Warp tabs handle independent tasks concurrently.
 - Perform multiple self-contained tasks from `TASKS.md` in separate Warp tabs using concurrent agents. Challenge: how many agents can you have working simultaneously?
 
 >*Tips: [git worktree](https://git-scm.com/docs/git-worktree) may be helpful here to keep agents from clobbering over each other.*
 
 
-## Part II: Put Your Automations to Work 
+## Part II: Put Your Automations to Work
 Now that you’ve built 2+ automations, let's put them to use! In the `writeup.md` under section *"How you used the automation (what pain point it resolves or accelerates)"*, describe how you leveraged each automation to improve some workflow.
 
 ## Constraints and scope
@@ -114,5 +114,4 @@ Work strictly in `week5/` (backend, frontend, logic, tests). Avoid changing othe
 ## SUBMISSION INSTRUCTIONS
 1. Make sure you have all changes pushed to your remote repository for grading.
 2. **Make sure you've added both brentju and febielin as collaborators on your assignment repository.**
-2. Submit via Gradescope. 
-
+2. Submit via Gradescope.

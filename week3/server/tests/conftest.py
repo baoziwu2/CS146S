@@ -1,8 +1,8 @@
 """Pytest configuration and fixtures."""
 
-import os
+from unittest.mock import Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
 from google.oauth2.credentials import Credentials
 
 from server.auth import get_credentials
@@ -37,7 +37,7 @@ def gmail_tools(mock_gmail_client):
 @pytest.fixture(scope="session")
 def live_credentials():
     """Real credentials for live API tests.
-    
+
     Requires .token.json to exist.
     Skips test if credentials are not available.
     """
@@ -62,4 +62,3 @@ def live_gmail_tools(live_gmail_client):
 def pytest_configure(config):
     """Register custom markers."""
     config.addinivalue_line("markers", "live: mark test as requiring live Gmail API access")
-

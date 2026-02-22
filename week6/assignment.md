@@ -35,8 +35,8 @@ semgrep ci --subdir week6
 
 3. Important: Ensure the app still runs and tests still pass after your fixes.
 
-## Deliverables 
-### 1. Brief findings overview 
+## Deliverables
+### 1. Brief findings overview
 - Summarize the categories Semgrep reported (SAST/Secrets/SCA).
 - Note any false positives or noisy rules you chose to ignore and why.
 
@@ -58,4 +58,4 @@ For each fixed issue:
 ## Submission Instructions
 1. Make sure you have all changes pushed to your remote repository for grading.
 2. Make sure you've added both brentju and febielin as collaborators on your assignment repository.
-2. Submit via Gradescope. 
+2. Submit via Gradescope.

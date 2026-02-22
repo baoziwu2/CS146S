@@ -1,4 +1,3 @@
-import os
 from dotenv import load_dotenv
 from ollama import chat
 
@@ -42,6 +41,7 @@ httpstatus
 
 EXPECTED_OUTPUT = "sutatsptth"
 
+
 def test_your_prompt(system_prompt: str) -> bool:
     """Run the prompt up to NUM_RUNS_TIMES and return True if any output matches EXPECTED_OUTPUT.
 
@@ -65,6 +65,7 @@ def test_your_prompt(system_prompt: str) -> bool:
             print(f"Expected output: {EXPECTED_OUTPUT}")
             print(f"Actual output: {output_text}")
     return False
+
 
 if __name__ == "__main__":
     test_your_prompt(YOUR_SYSTEM_PROMPT)

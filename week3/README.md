@@ -77,8 +77,8 @@ python server\auth_cli.py
 
 编辑 Claude Desktop 配置文件（位置因系统而异）：
 
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`  
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 **Linux**: `~/.config/Claude/claude_desktop_config.json`
 
 添加以下配置（**请将路径替换为你的实际路径**）：
@@ -99,7 +99,7 @@ python server\auth_cli.py
 }
 ```
 
-**注意**: 
+**注意**:
 - `command` 路径必须是 `.venv/Scripts/python.exe` 的**绝对路径**
 - `PYTHONPATH` 应指向 `week3/` 目录的绝对路径
 - `cwd` 也应指向 `week3/` 目录
@@ -387,4 +387,3 @@ week3/
 ## 许可证
 
 本项目仅用于课程作业，不用于商业用途。
-

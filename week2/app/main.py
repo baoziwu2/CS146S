@@ -11,6 +11,7 @@ from .routers import action_items, notes
 
 app = FastAPI(title="Action Item Extractor")
 
+
 @app.on_event("startup")
 def startup_event() -> None:
     init_db()

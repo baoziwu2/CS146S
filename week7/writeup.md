@@ -13,7 +13,7 @@ Name: **TODO** \
 SUNet ID: **TODO** \
 Citations: **TODO**
 
-This assignment took me about **TODO** hours to do. 
+This assignment took me about **TODO** hours to do.
 
 
 ## Task 1: Add more endpoints and validations
@@ -56,9 +56,9 @@ b. PR Description
 c. Graphite Diamond generated code review
 > TODO
 
-## Brief Reflection 
+## Brief Reflection
 a. The types of comments you typically made in your manual reviews (e.g., correctness, performance, security, naming, test gaps, API shape, UX, docs).
-> TODO 
+> TODO
 
 b. A comparison of **your** comments vs. **Graphite’s** AI-generated comments for each PR.
 > TODO
@@ -67,7 +67,4 @@ c. When the AI reviews were better/worse than yours (cite specific examples)
 > TODO
 
 d. Your comfort level trusting AI reviews going forward and any heuristics for when to rely on them.
->TODO 
-
-
-
+>TODO

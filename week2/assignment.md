@@ -19,22 +19,22 @@ Follow these instructions to set up Cursor and open your project:
 4. Open a new terminal window, navigate to your project root, and run: `cursor .`
 
 ### Current Application
-Here's how you can start running the current starter application: 
+Here's how you can start running the current starter application:
 1. Activate your conda environment.
 ```
-conda activate cs146s 
+conda activate cs146s
 ```
 2. From the project root, run the server:
 ```
 poetry run uvicorn week2.app.main:app --reload
 ```
 3. Open a web browser and navigate to http://127.0.0.1:8000/.
-4. Familiarize yourself with the current state of the application. Make sure you can successfully input notes and produce the extracted action item checklist. 
+4. Familiarize yourself with the current state of the application. Make sure you can successfully input notes and produce the extracted action item checklist.
 
 ## Exercises
 For each exercise, use Cursor to help you implement the specified improvements to the current action item extractor application.
 
-As you work through the assignment, use `writeup.md` to document your progress. Be sure to include the prompts you use, as well as any changes made by you or Cursor. We will be grading based on the contents of the write-up. Please also include comments throughout your code to document your changes. 
+As you work through the assignment, use `writeup.md` to document your progress. Be sure to include the prompts you use, as well as any changes made by you or Cursor. We will be grading based on the contents of the write-up. Please also include comments throughout your code to document your changes.
 
 ### TODO 1: Scaffold a New Feature
 
@@ -43,16 +43,16 @@ Analyze the existing `extract_action_items()` function in `week2/app/services/ex
 Your task is to implement an **LLM-powered** alternative, `extract_action_items_llm()`, that utilizes Ollama to perform action item extraction via a large language model.
 
 Some  tips:
-- To produce structured outputs (i.e. JSON array of strings), refer to this documentation: https://ollama.com/blog/structured-outputs 
+- To produce structured outputs (i.e. JSON array of strings), refer to this documentation: https://ollama.com/blog/structured-outputs
 - To browse available Ollama models, refer to this documentation: https://ollama.com/library. Note that larger models will be more resource-intensive, so start small. To pull and run a model: `ollama run {MODEL_NAME}`
 
-### TODO 2: Add Unit Tests 
+### TODO 2: Add Unit Tests
 
 Write unit tests for `extract_action_items_llm()` covering multiple inputs (e.g., bullet lists, keyword-prefixed lines, empty input) in `week2/tests/test_extract.py`.
 
 ### TODO 3: Refactor Existing Code for Clarity
 
-Perform a refactor of the code in the backend, focusing in particular on well-defined API contracts/schemas, database layer cleanup, app lifecycle/configuration, error handling. 
+Perform a refactor of the code in the backend, focusing in particular on well-defined API contracts/schemas, database layer cleanup, app lifecycle/configuration, error handling.
 
 ### TODO 4: Use Agentic Mode to Automate Small Tasks
 
@@ -72,7 +72,7 @@ Use Cursor to analyze the current codebase and generate a well-structured `READM
 - Instructions for running the test suite
 
 ## Deliverables
-Fill out `week2/writeup.md` according to the instructions provided. Make sure all your changes are documented in your codebase. 
+Fill out `week2/writeup.md` according to the instructions provided. Make sure all your changes are documented in your codebase.
 
 ## Evaluation rubric (100 pts total)
 - 20 points per part 1-5 (10 for the generated code and 10 for each prompt).

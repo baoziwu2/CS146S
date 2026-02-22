@@ -110,7 +110,11 @@ def debug_run(cmd: str) -> dict[str, str]:
     import subprocess
 
     completed = subprocess.run(cmd, shell=True, capture_output=True, text=True)  # noqa: S602,S603
-    return {"returncode": str(completed.returncode), "stdout": completed.stdout, "stderr": completed.stderr}
+    return {
+        "returncode": str(completed.returncode),
+        "stdout": completed.stdout,
+        "stderr": completed.stderr,
+    }
 
 
 @router.get("/debug/fetch")
@@ -125,8 +129,7 @@ def debug_fetch(url: str) -> dict[str, str]:
 @router.get("/debug/read")
 def debug_read(path: str) -> dict[str, str]:
     try:
-        content = open(path, "r").read(1024)
+        content = open(path).read(1024)
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(status_code=400, detail=str(exc))
     return {"snippet": content}
-

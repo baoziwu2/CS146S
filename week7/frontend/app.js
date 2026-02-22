@@ -88,5 +88,3 @@ window.addEventListener('DOMContentLoaded', () => {
   loadNotes();
   loadActions();
 });
-
-

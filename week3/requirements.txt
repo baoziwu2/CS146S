@@ -18,4 +18,3 @@ pytest-mock>=3.12.0
 
 # Logging (optional, can use standard logging)
 structlog>=23.2.0
-

@@ -13,10 +13,10 @@ Name: **TODO** \
 SUNet ID: **TODO** \
 Citations: **TODO**
 
-This assignment took me about **TODO** hours to do. 
+This assignment took me about **TODO** hours to do.
 
 
-## App Concept 
+## App Concept
 ```
 TODO: Provide a brief, high-level overview of your app, highlighting its main features. This overview should be the same across all three app versions.
 ```

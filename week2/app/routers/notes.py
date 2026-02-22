@@ -54,8 +54,5 @@ def list_notes() -> List[NoteResponse]:
     """List all notes ordered by newest first."""
     rows = db.list_notes()
     return [
-        NoteResponse(id=r["id"], content=r["content"], created_at=r["created_at"])
-        for r in rows
+        NoteResponse(id=r["id"], content=r["content"], created_at=r["created_at"]) for r in rows
     ]
-
-

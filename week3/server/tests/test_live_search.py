@@ -10,22 +10,17 @@ Run with: pytest -m live -v
 
 import pytest
 
-from server.tools import GmailMcpTools
-
 
 @pytest.mark.live
 def test_basic_search(live_gmail_tools):
     """Test basic search functionality."""
-    result = live_gmail_tools.gmail_search_messages(
-        query="in:inbox",
-        max_results=5
-    )
-    
+    result = live_gmail_tools.gmail_search_messages(query="in:inbox", max_results=5)
+
     assert "results" in result
     assert "total_count" in result
     assert result["total_count"] >= 0
     assert len(result["results"]) <= 5
-    
+
     if result["results"]:
         first = result["results"][0]
         assert "id" in first
@@ -37,11 +32,8 @@ def test_subject_search(live_gmail_tools):
     """Test subject-based search."""
     # This test requires a known subject in your Gmail
     # Adjust the query to match your test emails
-    result = live_gmail_tools.gmail_search_messages(
-        query="in:inbox",
-        max_results=10
-    )
-    
+    result = live_gmail_tools.gmail_search_messages(query="in:inbox", max_results=10)
+
     if result["results"]:
         # Verify results have subject field (if enriched)
         first = result["results"][0]
@@ -52,11 +44,8 @@ def test_subject_search(live_gmail_tools):
 @pytest.mark.live
 def test_from_search(live_gmail_tools):
     """Test from: filter search."""
-    result = live_gmail_tools.gmail_search_messages(
-        query="in:inbox",
-        max_results=10
-    )
-    
+    result = live_gmail_tools.gmail_search_messages(query="in:inbox", max_results=10)
+
     assert "results" in result
     # Verify structure even if no results match
     if result["results"]:
@@ -67,12 +56,8 @@ def test_from_search(live_gmail_tools):
 @pytest.mark.live
 def test_newer_than_days_filter(live_gmail_tools):
     """Test newer_than_days filter."""
-    result = live_gmail_tools.gmail_search_messages(
-        query="",
-        max_results=10,
-        newer_than_days=3
-    )
-    
+    result = live_gmail_tools.gmail_search_messages(query="", max_results=10, newer_than_days=3)
+
     assert "results" in result
     # Results should be from last 3 days (if any exist)
 
@@ -80,12 +65,8 @@ def test_newer_than_days_filter(live_gmail_tools):
 @pytest.mark.live
 def test_label_ids_filter(live_gmail_tools):
     """Test label_ids filter."""
-    result = live_gmail_tools.gmail_search_messages(
-        query="",
-        max_results=10,
-        label_ids=["INBOX"]
-    )
-    
+    result = live_gmail_tools.gmail_search_messages(query="", max_results=10, label_ids=["INBOX"])
+
     assert "results" in result
     # Results should be from INBOX
 
@@ -93,16 +74,10 @@ def test_label_ids_filter(live_gmail_tools):
 @pytest.mark.live
 def test_pagination(live_gmail_tools):
     """Test pagination with larger result set."""
-    result_small = live_gmail_tools.gmail_search_messages(
-        query="in:anywhere",
-        max_results=5
-    )
-    
-    result_large = live_gmail_tools.gmail_search_messages(
-        query="in:anywhere",
-        max_results=25
-    )
-    
+    result_small = live_gmail_tools.gmail_search_messages(query="in:anywhere", max_results=5)
+
+    result_large = live_gmail_tools.gmail_search_messages(query="in:anywhere", max_results=25)
+
     assert result_large["total_count"] >= result_small["total_count"]
     assert len(result_large["results"]) <= 25
     assert len(result_small["results"]) <= 5
@@ -111,11 +86,8 @@ def test_pagination(live_gmail_tools):
 @pytest.mark.live
 def test_deduplication(live_gmail_tools):
     """Test that results are deduplicated."""
-    result = live_gmail_tools.gmail_search_messages(
-        query="in:anywhere",
-        max_results=30
-    )
-    
+    result = live_gmail_tools.gmail_search_messages(query="in:anywhere", max_results=30)
+
     if result["results"]:
         ids = [r["id"] for r in result["results"]]
         assert len(ids) == len(set(ids))  # No duplicates
@@ -125,10 +97,9 @@ def test_deduplication(live_gmail_tools):
 def test_empty_results(live_gmail_tools):
     """Test handling of empty search results."""
     result = live_gmail_tools.gmail_search_messages(
-        query="from:nonexistent_z9x8y7@fakeemail.test",
-        max_results=10
+        query="from:nonexistent_z9x8y7@fakeemail.test", max_results=10
     )
-    
+
     assert "results" in result
     assert result["total_count"] == 0
     assert result["results"] == []
@@ -138,18 +109,12 @@ def test_empty_results(live_gmail_tools):
 @pytest.mark.live
 def test_max_results_boundary(live_gmail_tools):
     """Test max_results boundary values."""
-    result_1 = live_gmail_tools.gmail_search_messages(
-        query="in:inbox",
-        max_results=1
-    )
-    
+    result_1 = live_gmail_tools.gmail_search_messages(query="in:inbox", max_results=1)
+
     assert len(result_1["results"]) <= 1
-    
-    result_50 = live_gmail_tools.gmail_search_messages(
-        query="in:inbox",
-        max_results=50
-    )
-    
+
+    result_50 = live_gmail_tools.gmail_search_messages(query="in:inbox", max_results=50)
+
     assert len(result_50["results"]) <= 50
 
 
@@ -157,12 +122,8 @@ def test_max_results_boundary(live_gmail_tools):
 def test_complex_query(live_gmail_tools):
     """Test complex query combination."""
     result = live_gmail_tools.gmail_search_messages(
-        query="in:inbox",
-        max_results=10,
-        newer_than_days=30,
-        label_ids=["INBOX"]
+        query="in:inbox", max_results=10, newer_than_days=30, label_ids=["INBOX"]
     )
-    
+
     assert "results" in result
     # Verify query was combined correctly (results should match all criteria)
-

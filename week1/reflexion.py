@@ -1,6 +1,6 @@
-import os
 import re
 from typing import Callable, List, Tuple
+
 from dotenv import load_dotenv
 from ollama import chat
 
@@ -36,10 +36,10 @@ Follow the ground-truth rules implied by the diagnostics:
 # Ground-truth test suite used to evaluate generated code
 SPECIALS = set("!@#$%^&*()-_")
 TEST_CASES: List[Tuple[str, bool]] = [
-    ("Password1!", True),       # valid
-    ("password1!", False),      # missing uppercase
-    ("Password!", False),       # missing digit
-    ("Password1", False),       # missing special
+    ("Password1!", True),  # valid
+    ("password1!", False),  # missing uppercase
+    ("Password!", False),  # missing digit
+    ("Password1", False),  # missing special
 ]
 
 
@@ -111,7 +111,9 @@ def your_build_reflexion_context(prev_code: str, failures: List[str]) -> str:
 
     Return a string that will be sent as the user content alongside the reflexion system prompt.
     """
-    failures_text = "\n".join(f"- {f}" for f in failures) if failures else "- (no failures provided)"
+    failures_text = (
+        "\n".join(f"- {f}" for f in failures) if failures else "- (no failures provided)"
+    )
     return failures_text
 
 

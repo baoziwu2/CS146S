@@ -92,7 +92,7 @@
           const data = await res.json();
           console.log('LLM Extract Response Data:', data);
           console.log('Items count:', data.items?.length || 0);
-          
+
           if (!res.ok) throw new Error('Request failed');
           if (!data.items || data.items.length === 0) {
             itemsEl.innerHTML = '<p class="muted">No action items found.</p>';
@@ -139,5 +139,3 @@
     </script>
   </body>
   </html>
-
-

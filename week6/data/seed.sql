@@ -21,5 +21,3 @@ INSERT INTO notes (title, content) VALUES
 INSERT INTO action_items (description, completed) VALUES
   ('Try pre-commit', 0),
   ('Run tests', 0);
-
-

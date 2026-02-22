@@ -24,7 +24,7 @@ To gain a deeper understanding of Claude Code and explore your automation option
 2. **SubAgents overview:** [docs.anthropic.com/en/docs/claude-code/sub-agents](https://docs.anthropic.com/en/docs/claude-code/sub-agents)
 
 ## Explore the Starter Application
-Minimal full‑stack starter application designed to be a **"developer's command center"**. 
+Minimal full‑stack starter application designed to be a **"developer's command center"**.
 - FastAPI backend with SQLite (SQLAlchemy)
 - Static frontend (no Node toolchain needed)
 - Minimal tests (pytest)
@@ -129,7 +129,7 @@ SubAgents are specialized AI assistants configured to handle specific tasks with
 
 >*Tips: Use checklists/scratchpads, reset context (`/clear`) between roles, and run agents in parallel for independent tasks.*
 
-## Part II: Put Your Automations to Work 
+## Part II: Put Your Automations to Work
 Now that you’ve built 2+ automations, let's put them to use! In the `writeup.md` under section *"How you used the automation to enhance the starter application"*, describe how you leveraged each automation to improve or extend the app’s functionality.
 
 e.g. If you implemented the custom slash command `/generate-test-cases`, explain how you used it to interact with and test the starter application.
@@ -153,7 +153,4 @@ e.g. If you implemented the custom slash command `/generate-test-cases`, explain
 ## SUBMISSION INSTRUCTIONS
 1. Make sure you have all changes pushed to your remote repository for grading.
 2. **Make sure you've added both brentju and febielin as collaborators on your assignment repository.**
-2. Submit via Gradescope. 
-
-
-
+2. Submit via Gradescope.

@@ -3,14 +3,14 @@
 You will practice multiple prompting techniques by crafting prompts to complete specific tasks. Each task’s instructions are at the top of its corresponding source file.
 
 ## Installation
-Make sure you have first done the installation described in the top-level `README.md`. 
+Make sure you have first done the installation described in the top-level `README.md`.
 
 ## Ollama installation
 We will be using a tool to run different state-of-the-art LLMs locally on your machine called [Ollama](https://ollama.com/). Use one of the following methods:
 
 - macOS (Homebrew):
   ```bash
-  brew install --cask ollama 
+  brew install --cask ollama
   ollama serve
   ```
 
@@ -43,7 +43,7 @@ ollama run llama3.1:8b
 
 ## Deliverables
 - Read the task description in each file.
-- Design and run prompts (look for all the places labeled `TODO` in the code). That should be the only thing you have to change (i.e. don't tinker with the model). 
+- Design and run prompts (look for all the places labeled `TODO` in the code). That should be the only thing you have to change (i.e. don't tinker with the model).
 - Iterate to improve results until the test script passes.
 - Save your final prompt(s) and output for each technique.
 - Make sure to include in your submission the completed code for each prompting technique file. ***Double check that all `TODO`s have been resolved.***
