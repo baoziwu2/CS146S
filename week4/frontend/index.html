@@ -14,8 +14,13 @@
         <h2>Notes</h2>
         <form id="note-form">
           <input id="note-title" placeholder="Title" required />
-          <input id="note-content" placeholder="Content" required />
+          <textarea id="note-content" placeholder="Content" required rows="4"></textarea>
           <button type="submit">Add</button>
+        </form>
+        <form id="search-form">
+          <input id="search-query" placeholder="Search notes…" />
+          <button type="submit">Search</button>
+          <button type="reset">Clear</button>
         </form>
         <ul id="notes"></ul>
       </section>

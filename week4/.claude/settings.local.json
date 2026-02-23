@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(cd \"E:/Users/Document/code/CS146S/CS146S/week4\" && conda run -n cs146s make test 2>&1)",
+      "Bash(cd \"E:/Users/Document/code/CS146S/CS146S/week4\" && conda run -n cs146s make lint 2>&1)",
+      "Bash(cd \"E:/Users/Document/code/CS146S/CS146S/week4\" && conda run -n cs146s make test 2>&1 | tail -8 && conda run -n cs146s make lint 2>&1)",
+      "Bash(cd \"E:/Users/Document/code/CS146S/CS146S/week4\" && conda run -n cs146s make test 2>&1 | tail -4 && conda run -n cs146s make lint 2>&1)",
+      "Bash(cd \"E:/Users/Document/code/CS146S/CS146S/week4\" && conda run -n cs146s make test 2>&1 | tail -6 && conda run -n cs146s make lint 2>&1)"
+    ]
+  }
+}

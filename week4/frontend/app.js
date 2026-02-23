@@ -4,13 +4,39 @@ async function fetchJSON(url, options) {
   return res.json();
 }
 
-async function loadNotes() {
+async function loadNotes(q = '') {
   const list = document.getElementById('notes');
   list.innerHTML = '';
-  const notes = await fetchJSON('/notes/');
+  const url = q ? `/notes/search/?q=${encodeURIComponent(q)}` : '/notes/';
+  const notes = await fetchJSON(url);
   for (const n of notes) {
     const li = document.createElement('li');
     li.textContent = `${n.title}: ${n.content}`;
+
+    const editBtn = document.createElement('button');
+    editBtn.textContent = 'Edit';
+    editBtn.onclick = async () => {
+      const title = prompt('New title:', n.title);
+      if (title === null) return;
+      const content = prompt('New content:', n.content);
+      if (content === null) return;
+      await fetchJSON(`/notes/${n.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, content }),
+      });
+      loadNotes(q);
+    };
+
+    const delBtn = document.createElement('button');
+    delBtn.textContent = 'Delete';
+    delBtn.onclick = async () => {
+      await fetch(`/notes/${n.id}`, { method: 'DELETE' });
+      loadNotes(q);
+    };
+
+    li.appendChild(editBtn);
+    li.appendChild(delBtn);
     list.appendChild(li);
   }
 }
@@ -59,6 +85,16 @@ window.addEventListener('DOMContentLoaded', () => {
     });
     e.target.reset();
     loadActions();
+  });
+
+  document.getElementById('search-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const q = document.getElementById('search-query').value.trim();
+    loadNotes(q);
+  });
+
+  document.getElementById('search-form').addEventListener('reset', () => {
+    loadNotes();
   });
 
   loadNotes();
