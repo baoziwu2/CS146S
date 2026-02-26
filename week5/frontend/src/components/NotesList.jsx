@@ -39,9 +39,22 @@ const NotesList = forwardRef(function NotesList(_, ref) {
   }))
 
   async function handleDelete(id) {
-    await fetch(`/notes/${id}`, { method: 'DELETE' })
-    loadNotes()
-    if (query) runSearch(query, page)
+    // Optimistic: remove immediately, restore on failure
+    const prevNotes = notes
+    const prevSearch = searchResults
+    setNotes((prev) => prev.filter((n) => n.id !== id))
+    if (searchResults) {
+      setSearchResults((prev) => ({
+        ...prev,
+        items: prev.items.filter((n) => n.id !== id),
+        total: prev.total - 1,
+      }))
+    }
+    const res = await fetch(`/notes/${id}`, { method: 'DELETE' })
+    if (!res.ok) {
+      setNotes(prevNotes)
+      setSearchResults(prevSearch)
+    }
   }
 
   function startEdit(note) {
@@ -51,14 +64,28 @@ const NotesList = forwardRef(function NotesList(_, ref) {
   }
 
   async function handleSave(id) {
-    await fetch(`/notes/${id}`, {
+    // Optimistic: apply edit immediately, roll back + reopen form on failure
+    const prevNotes = notes
+    const prevSearch = searchResults
+    const updated = { id, title: editTitle, content: editContent }
+    setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, ...updated } : n)))
+    if (searchResults) {
+      setSearchResults((prev) => ({
+        ...prev,
+        items: prev.items.map((n) => (n.id === id ? { ...n, ...updated } : n)),
+      }))
+    }
+    setEditingId(null)
+    const res = await fetch(`/notes/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title: editTitle, content: editContent }),
     })
-    setEditingId(null)
-    loadNotes()
-    if (query) runSearch(query, page)
+    if (!res.ok) {
+      setNotes(prevNotes)
+      setSearchResults(prevSearch)
+      setEditingId(id) // reopen the edit form with the original values still in state
+    }
   }
 
   function handleQueryChange(e) {
