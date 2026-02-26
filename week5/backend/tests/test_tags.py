@@ -49,6 +49,18 @@ def test_attach_tag_to_note(client):
     assert any(t["id"] == tag_id for t in r.json()["tags"])
 
 
+def test_attach_tag_to_nonexistent_note_returns_404(client):
+    tag_id = client.post("/tags/", json={"name": "python"}).json()["id"]
+    r = client.post("/notes/9999/tags", json={"tag_id": tag_id})
+    assert r.status_code == 404
+
+
+def test_attach_nonexistent_tag_to_note_returns_404(client):
+    note_id = client.post("/notes/", json={"title": "T", "content": "c"}).json()["id"]
+    r = client.post(f"/notes/{note_id}/tags", json={"tag_id": 9999})
+    assert r.status_code == 404
+
+
 def test_note_read_includes_tags(client):
     note_id = client.post("/notes/", json={"title": "Tagged", "content": "note body"}).json()["id"]
     tag_id = client.post("/tags/", json={"name": "python"}).json()["id"]
@@ -58,18 +70,6 @@ def test_note_read_includes_tags(client):
     note = r.json()
     assert "tags" in note
     assert any(t["id"] == tag_id for t in note["tags"])
-
-
-def test_attach_nonexistent_tag_returns_404(client):
-    note_id = client.post("/notes/", json={"title": "T", "content": "c"}).json()["id"]
-    r = client.post(f"/notes/{note_id}/tags", json={"tag_id": 9999})
-    assert r.status_code == 404
-
-
-def test_attach_tag_to_nonexistent_note_returns_404(client):
-    tag_id = client.post("/tags/", json={"name": "python"}).json()["id"]
-    r = client.post("/notes/9999/tags", json={"tag_id": tag_id})
-    assert r.status_code == 404
 
 
 def test_detach_tag_from_note(client):
@@ -115,7 +115,9 @@ def test_delete_note_does_not_delete_tag(client):
 
 
 def test_search_filter_by_tag_returns_tagged_notes_only(client):
-    note_id = client.post("/notes/", json={"title": "Python note", "content": "about py"}).json()["id"]
+    note_id = client.post(
+        "/notes/", json={"title": "Python note", "content": "about py"}
+    ).json()["id"]
     client.post("/notes/", json={"title": "JS note", "content": "about js"})
     tag_id = client.post("/tags/", json={"name": "python"}).json()["id"]
     client.post(f"/notes/{note_id}/tags", json={"tag_id": tag_id})
@@ -138,8 +140,12 @@ def test_search_filter_by_tag_no_results(client):
 
 def test_search_combined_q_and_tag_filter(client):
     """Both q= and tag= filters apply together (AND semantics)."""
-    note_id = client.post("/notes/", json={"title": "Python TDD", "content": "tdd content"}).json()["id"]
-    other_id = client.post("/notes/", json={"title": "Python OOP", "content": "oop content"}).json()["id"]
+    note_id = client.post(
+        "/notes/", json={"title": "Python TDD", "content": "tdd content"}
+    ).json()["id"]
+    other_id = client.post(
+        "/notes/", json={"title": "Python OOP", "content": "oop content"}
+    ).json()["id"]
     tag_id = client.post("/tags/", json={"name": "python"}).json()["id"]
     client.post(f"/notes/{note_id}/tags", json={"tag_id": tag_id})
     client.post(f"/notes/{other_id}/tags", json={"tag_id": tag_id})
