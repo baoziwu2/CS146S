@@ -18,8 +18,13 @@ router = APIRouter(prefix="/notes", tags=["notes"])
 
 
 @router.get("/", response_model=list[NoteRead])
-def list_notes(db: Session = Depends(get_db)) -> list[NoteRead]:
-    rows = db.execute(select(Note)).scalars().all()
+def list_notes(
+    tag_id: int | None = None, db: Session = Depends(get_db)
+) -> list[NoteRead]:
+    stmt = select(Note)
+    if tag_id is not None:
+        stmt = stmt.join(Note.tags).where(Tag.id == tag_id)
+    rows = db.execute(stmt).scalars().all()
     return [NoteRead.model_validate(row) for row in rows]
 
 
@@ -35,7 +40,7 @@ def create_note(payload: NoteCreate, db: Session = Depends(get_db)) -> NoteRead:
 @router.get("/search/", response_model=NoteSearchPage)
 def search_notes(
     q: str | None = None,
-    tag: str | None = None,
+    tag_id: int | None = None,
     page: int = 1,
     page_size: int = 10,
     sort: str = "created_desc",
@@ -45,8 +50,8 @@ def search_notes(
     if q:
         pattern = f"%{q}%"
         stmt = stmt.where(Note.title.ilike(pattern) | Note.content.ilike(pattern))
-    if tag:
-        stmt = stmt.join(Note.tags).where(Tag.name.ilike(tag))
+    if tag_id is not None:
+        stmt = stmt.join(Note.tags).where(Tag.id == tag_id)
 
     # Count total matching results before pagination
     total: int = db.execute(select(func.count()).select_from(stmt.subquery())).scalar_one()
