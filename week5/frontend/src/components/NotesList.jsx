@@ -94,6 +94,10 @@ const NotesList = forwardRef(function NotesList({ tagId = null }, ref) {
       setNotes(prevNotes)
       setSearchResults(prevSearch)
       setEditingId(id)
+    } else if (/#\w/.test(editTitle) || /#\w/.test(editContent) || /- \[ \]/.test(editContent)) {
+      // Auto-extract #hashtags and - [ ] tasks; reload to reflect new tags
+      await fetch(`/notes/${id}/extract?apply=true`, { method: 'POST' })
+      loadNotes()
     }
   }
 
