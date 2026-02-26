@@ -3,7 +3,7 @@ from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 
-# Join table for many-to-many Note <-> Tag
+# Many-to-many join table: notes ↔ tags
 note_tags = Table(
     "note_tags",
     Base.metadata,
@@ -18,15 +18,15 @@ class Note(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(200), nullable=False)
     content = Column(Text, nullable=False)
-    tags = relationship("Tag", secondary=note_tags, back_populates="notes", lazy="select")
+    tags = relationship("Tag", secondary=note_tags, back_populates="notes", lazy="selectin")
 
 
 class Tag(Base):
     __tablename__ = "tags"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(100), nullable=False, unique=True)
-    notes = relationship("Note", secondary=note_tags, back_populates="tags", lazy="select")
+    name = Column(String(50), unique=True, nullable=False, index=True)
+    notes = relationship("Note", secondary=note_tags, back_populates="tags", lazy="selectin")
 
 
 class ActionItem(Base):

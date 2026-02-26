@@ -2,7 +2,11 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class TagCreate(BaseModel):
-    name: str = Field(min_length=1, max_length=100)
+    name: str = Field(min_length=1, max_length=50)
+
+
+class TagAttachRequest(BaseModel):
+    tag_id: int
 
 
 class TagRead(BaseModel):
@@ -10,10 +14,6 @@ class TagRead(BaseModel):
 
     id: int
     name: str
-
-
-class NoteTagAttach(BaseModel):
-    tag_id: int
 
 
 class NoteCreate(BaseModel):
@@ -42,6 +42,11 @@ class NoteSearchPage(BaseModel):
     page_size: int
 
 
+class ExtractionResult(BaseModel):
+    tags: list[str]
+    action_items: list[str]
+
+
 class ActionItemCreate(BaseModel):
     description: str
 
@@ -56,8 +61,3 @@ class ActionItemRead(BaseModel):
 
 class BulkCompleteRequest(BaseModel):
     ids: list[int]
-
-
-class ExtractionResult(BaseModel):
-    tags: list[str]
-    action_items: list[str]
