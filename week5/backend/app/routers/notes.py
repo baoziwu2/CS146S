@@ -3,8 +3,16 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ..db import get_db
-from ..models import Note, Tag
-from ..schemas import NoteCreate, NoteRead, NoteSearchPage, NoteTagAttach, NoteUpdate
+from ..models import ActionItem, Note, Tag
+from ..schemas import (
+    ExtractionResult,
+    NoteCreate,
+    NoteRead,
+    NoteSearchPage,
+    NoteTagAttach,
+    NoteUpdate,
+)
+from ..services.extract import extract_tags, extract_tasks
 
 router = APIRouter(prefix="/notes", tags=["notes"])
 
@@ -59,6 +67,36 @@ def search_notes(
         page=page,
         page_size=page_size,
     )
+
+
+@router.post("/{note_id}/extract", response_model=ExtractionResult)
+def extract_note(
+    note_id: int,
+    apply: bool = False,
+    db: Session = Depends(get_db),
+) -> ExtractionResult:
+    note = db.get(Note, note_id)
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+
+    combined = f"{note.title}\n{note.content}"
+    tag_names = extract_tags(combined)
+    task_texts = extract_tasks(combined)
+
+    if apply:
+        for name in tag_names:
+            tag = db.execute(select(Tag).where(Tag.name == name)).scalar_one_or_none()
+            if not tag:
+                tag = Tag(name=name)
+                db.add(tag)
+                db.flush()
+            if tag not in note.tags:
+                note.tags.append(tag)
+        for text in task_texts:
+            db.add(ActionItem(description=text, completed=False))
+        db.flush()
+
+    return ExtractionResult(tags=tag_names, action_items=task_texts)
 
 
 @router.get("/{note_id}", response_model=NoteRead)
