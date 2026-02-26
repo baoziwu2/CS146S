@@ -2,7 +2,7 @@ import { useState, useEffect, useImperativeHandle, forwardRef } from 'react'
 
 const PAGE_SIZE = 5
 
-const NotesList = forwardRef(function NotesList(_, ref) {
+const NotesList = forwardRef(function NotesList({ tagId = null }, ref) {
   const [notes, setNotes] = useState([])
   const [editingId, setEditingId] = useState(null)
   const [editTitle, setEditTitle] = useState('')
@@ -14,13 +14,22 @@ const NotesList = forwardRef(function NotesList(_, ref) {
   const [page, setPage] = useState(1)
 
   async function loadNotes() {
-    const res = await fetch('/notes/')
-    if (!res.ok) return
-    setNotes(await res.json())
+    if (tagId !== null) {
+      // Tag filter: use the search endpoint with tag_id
+      const params = new URLSearchParams({ tag_id: tagId, page_size: 100 })
+      const res = await fetch(`/notes/search/?${params}`)
+      if (!res.ok) return
+      setNotes((await res.json()).items)
+    } else {
+      const res = await fetch('/notes/')
+      if (!res.ok) return
+      setNotes(await res.json())
+    }
   }
 
   async function runSearch(q, p = 1) {
     const params = new URLSearchParams({ q, page: p, page_size: PAGE_SIZE, sort: 'created_desc' })
+    if (tagId !== null) params.set('tag_id', tagId)
     const res = await fetch(`/notes/search/?${params}`)
     if (!res.ok) return
     setSearchResults(await res.json())
@@ -29,7 +38,7 @@ const NotesList = forwardRef(function NotesList(_, ref) {
 
   useEffect(() => {
     loadNotes()
-  }, [])
+  }, [tagId])
 
   useImperativeHandle(ref, () => ({
     reload: () => {
@@ -84,7 +93,7 @@ const NotesList = forwardRef(function NotesList(_, ref) {
     if (!res.ok) {
       setNotes(prevNotes)
       setSearchResults(prevSearch)
-      setEditingId(id) // reopen the edit form with the original values still in state
+      setEditingId(id)
     }
   }
 
@@ -135,6 +144,15 @@ const NotesList = forwardRef(function NotesList(_, ref) {
             ) : (
               <li key={note.id}>
                 <strong>{note.title}</strong>: {note.content}
+                {note.tags?.length > 0 && (
+                  <span aria-label="tags">
+                    {note.tags.map((t) => (
+                      <span key={t.id} className="tag-chip">
+                        {t.name}
+                      </span>
+                    ))}
+                  </span>
+                )}
                 <button onClick={() => startEdit(note)}>Edit</button>
                 <button onClick={() => handleDelete(note.id)}>Delete</button>
               </li>

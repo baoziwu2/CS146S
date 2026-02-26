@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import NotesList from './components/NotesList'
 import NoteForm from './components/NoteForm'
 import ActionItemsList from './components/ActionItemsList'
@@ -8,6 +8,15 @@ export default function App() {
   const notesListRef = useRef(null)
   const actionsListRef = useRef(null)
 
+  const [tags, setTags] = useState([])
+  const [selectedTagId, setSelectedTagId] = useState(null)
+
+  useEffect(() => {
+    fetch('/tags')
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setTags)
+  }, [])
+
   return (
     <main>
       <h1>Modern Software Dev Starter</h1>
@@ -15,7 +24,28 @@ export default function App() {
       <section>
         <h2>Notes</h2>
         <NoteForm onCreated={() => notesListRef.current?.reload()} />
-        <NotesList ref={notesListRef} />
+
+        {tags.length > 0 && (
+          <div role="group" aria-label="Filter notes by tag">
+            <button
+              onClick={() => setSelectedTagId(null)}
+              aria-pressed={selectedTagId === null}
+            >
+              All tags
+            </button>
+            {tags.map((tag) => (
+              <button
+                key={tag.id}
+                onClick={() => setSelectedTagId(tag.id)}
+                aria-pressed={selectedTagId === tag.id}
+              >
+                {tag.name}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <NotesList ref={notesListRef} tagId={selectedTagId} />
       </section>
 
       <section>
