@@ -1,6 +1,21 @@
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class TagCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=100)
+
+
+class TagRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+
+
+class NoteTagAttach(BaseModel):
+    tag_id: int
+
+
 class NoteCreate(BaseModel):
     title: str = Field(min_length=1, max_length=200)
     content: str = Field(min_length=1)
@@ -17,6 +32,7 @@ class NoteRead(BaseModel):
     id: int
     title: str
     content: str
+    tags: list[TagRead] = []
 
 
 class NoteSearchPage(BaseModel):

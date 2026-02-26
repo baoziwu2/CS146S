@@ -3,8 +3,8 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ..db import get_db
-from ..models import Note
-from ..schemas import NoteCreate, NoteRead, NoteSearchPage, NoteUpdate
+from ..models import Note, Tag
+from ..schemas import NoteCreate, NoteRead, NoteSearchPage, NoteTagAttach, NoteUpdate
 
 router = APIRouter(prefix="/notes", tags=["notes"])
 
@@ -27,6 +27,7 @@ def create_note(payload: NoteCreate, db: Session = Depends(get_db)) -> NoteRead:
 @router.get("/search/", response_model=NoteSearchPage)
 def search_notes(
     q: str | None = None,
+    tag_id: int | None = None,
     page: int = 1,
     page_size: int = 10,
     sort: str = "created_desc",
@@ -36,6 +37,8 @@ def search_notes(
     if q:
         pattern = f"%{q}%"
         stmt = stmt.where(Note.title.ilike(pattern) | Note.content.ilike(pattern))
+    if tag_id is not None:
+        stmt = stmt.where(Note.tags.any(Tag.id == tag_id))
 
     # Count total matching results before pagination
     total: int = db.execute(select(func.count()).select_from(stmt.subquery())).scalar_one()
@@ -85,3 +88,30 @@ def delete_note(note_id: int, db: Session = Depends(get_db)) -> None:
         raise HTTPException(status_code=404, detail="Note not found")
     db.delete(note)
     db.flush()
+
+
+@router.post("/{note_id}/tags", response_model=NoteRead)
+def attach_tag(note_id: int, payload: NoteTagAttach, db: Session = Depends(get_db)) -> NoteRead:
+    note = db.get(Note, note_id)
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    tag = db.get(Tag, payload.tag_id)
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not found")
+    if tag not in note.tags:
+        note.tags.append(tag)
+        db.flush()
+    return NoteRead.model_validate(note)
+
+
+@router.delete("/{note_id}/tags/{tag_id}", response_model=NoteRead)
+def detach_tag(note_id: int, tag_id: int, db: Session = Depends(get_db)) -> NoteRead:
+    note = db.get(Note, note_id)
+    if not note:
+        raise HTTPException(status_code=404, detail="Note not found")
+    tag = next((t for t in note.tags if t.id == tag_id), None)
+    if not tag:
+        raise HTTPException(status_code=404, detail="Tag not attached to this note")
+    note.tags.remove(tag)
+    db.flush()
+    return NoteRead.model_validate(note)
