@@ -1,14 +1,14 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class NoteCreate(BaseModel):
-    title: str
-    content: str
+    title: str = Field(min_length=1, max_length=200)
+    content: str = Field(min_length=1)
 
 
 class NoteUpdate(BaseModel):
-    title: str
-    content: str
+    title: str = Field(min_length=1, max_length=200)
+    content: str = Field(min_length=1)
 
 
 class NoteRead(BaseModel):
