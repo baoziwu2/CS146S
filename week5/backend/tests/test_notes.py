@@ -151,3 +151,48 @@ def test_search_empty_page_beyond_total(client):
     data = r.json()
     assert data["items"] == []
     assert data["total"] == 1
+
+
+# ── Validation: payload min/max lengths (Task 3) ──────────────────────────────
+
+
+def test_create_note_with_empty_title_returns_422(client):
+    """POST /notes/ with an empty title is rejected with 422."""
+    r = client.post("/notes/", json={"title": "", "content": "some content"})
+    assert r.status_code == 422
+
+
+def test_create_note_with_title_too_long_returns_422(client):
+    """POST /notes/ with a title exceeding 200 characters is rejected with 422."""
+    r = client.post("/notes/", json={"title": "x" * 201, "content": "some content"})
+    assert r.status_code == 422
+
+
+def test_create_note_with_empty_content_returns_422(client):
+    """POST /notes/ with empty content is rejected with 422."""
+    r = client.post("/notes/", json={"title": "Valid title", "content": ""})
+    assert r.status_code == 422
+
+
+def test_update_note_with_empty_title_returns_422(client):
+    """PUT /notes/{id} with an empty title is rejected with 422."""
+    r = client.post("/notes/", json={"title": "Original", "content": "content"})
+    note_id = r.json()["id"]
+    r = client.put(f"/notes/{note_id}", json={"title": "", "content": "content"})
+    assert r.status_code == 422
+
+
+def test_update_note_with_title_too_long_returns_422(client):
+    """PUT /notes/{id} with a title exceeding 200 characters is rejected with 422."""
+    r = client.post("/notes/", json={"title": "Original", "content": "content"})
+    note_id = r.json()["id"]
+    r = client.put(f"/notes/{note_id}", json={"title": "x" * 201, "content": "content"})
+    assert r.status_code == 422
+
+
+def test_update_note_with_empty_content_returns_422(client):
+    """PUT /notes/{id} with empty content is rejected with 422."""
+    r = client.post("/notes/", json={"title": "Original", "content": "content"})
+    note_id = r.json()["id"]
+    r = client.put(f"/notes/{note_id}", json={"title": "Original", "content": ""})
+    assert r.status_code == 422
