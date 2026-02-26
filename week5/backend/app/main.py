@@ -14,8 +14,7 @@ app = FastAPI(title="Modern Software Dev Starter (Week 5)")
 # Ensure data dir exists
 Path("data").mkdir(parents=True, exist_ok=True)
 
-# Mount static frontend
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
+DIST_DIR = Path("frontend/dist")
 
 
 @app.on_event("startup")
@@ -26,9 +25,13 @@ def startup_event() -> None:
 
 @app.get("/")
 async def root() -> FileResponse:
-    return FileResponse("frontend/index.html")
+    return FileResponse(DIST_DIR / "index.html")
 
 
-# Routers
+# Routers — must be registered before the static catch-all mount
 app.include_router(notes_router.router)
 app.include_router(action_items_router.router)
+
+# Mount built React bundle last so API routes take priority
+if DIST_DIR.exists():
+    app.mount("/", StaticFiles(directory=str(DIST_DIR), html=True), name="static")
