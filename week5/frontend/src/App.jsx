@@ -11,10 +11,13 @@ export default function App() {
   const [tags, setTags] = useState([])
   const [selectedTagId, setSelectedTagId] = useState(null)
 
+  async function reloadTags() {
+    const r = await fetch('/tags')
+    if (r.ok) setTags(await r.json())
+  }
+
   useEffect(() => {
-    fetch('/tags')
-      .then((r) => (r.ok ? r.json() : []))
-      .then(setTags)
+    reloadTags()
   }, [])
 
   return (
@@ -23,7 +26,7 @@ export default function App() {
 
       <section>
         <h2>Notes</h2>
-        <NoteForm onCreated={() => notesListRef.current?.reload()} />
+        <NoteForm onCreated={() => { notesListRef.current?.reload(); reloadTags() }} />
 
         {tags.length > 0 && (
           <div role="group" aria-label="Filter notes by tag">
@@ -45,7 +48,7 @@ export default function App() {
           </div>
         )}
 
-        <NotesList ref={notesListRef} tagId={selectedTagId} />
+        <NotesList ref={notesListRef} tagId={selectedTagId} onTagsChanged={reloadTags} />
       </section>
 
       <section>

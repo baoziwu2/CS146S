@@ -2,7 +2,7 @@ import { useState, useEffect, useImperativeHandle, forwardRef } from 'react'
 
 const PAGE_SIZE = 5
 
-const NotesList = forwardRef(function NotesList({ tagId = null }, ref) {
+const NotesList = forwardRef(function NotesList({ tagId = null, onTagsChanged }, ref) {
   const [notes, setNotes] = useState([])
   const [editingId, setEditingId] = useState(null)
   const [editTitle, setEditTitle] = useState('')
@@ -98,6 +98,7 @@ const NotesList = forwardRef(function NotesList({ tagId = null }, ref) {
       // Auto-extract #hashtags and - [ ] tasks; reload to reflect new tags
       await fetch(`/notes/${id}/extract?apply=true`, { method: 'POST' })
       loadNotes()
+      onTagsChanged?.()
     }
   }
 
