@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ..db import get_db
 from ..models import Note
-from ..schemas import NoteCreate, NoteRead, NoteUpdate
+from ..schemas import NoteCreate, NoteRead, NoteSearchPage, NoteUpdate
 
 router = APIRouter(prefix="/notes", tags=["notes"])
 
@@ -24,17 +24,38 @@ def create_note(payload: NoteCreate, db: Session = Depends(get_db)) -> NoteRead:
     return NoteRead.model_validate(note)
 
 
-@router.get("/search/", response_model=list[NoteRead])
-def search_notes(q: str | None = None, db: Session = Depends(get_db)) -> list[NoteRead]:
-    if not q:
-        rows = db.execute(select(Note)).scalars().all()
-    else:
-        rows = (
-            db.execute(select(Note).where((Note.title.contains(q)) | (Note.content.contains(q))))
-            .scalars()
-            .all()
-        )
-    return [NoteRead.model_validate(row) for row in rows]
+@router.get("/search/", response_model=NoteSearchPage)
+def search_notes(
+    q: str | None = None,
+    page: int = 1,
+    page_size: int = 10,
+    sort: str = "created_desc",
+    db: Session = Depends(get_db),
+) -> NoteSearchPage:
+    stmt = select(Note)
+    if q:
+        pattern = f"%{q}%"
+        stmt = stmt.where(Note.title.ilike(pattern) | Note.content.ilike(pattern))
+
+    # Count total matching results before pagination
+    total: int = db.execute(select(func.count()).select_from(stmt.subquery())).scalar_one()
+
+    # Apply sorting
+    if sort == "title_asc":
+        stmt = stmt.order_by(Note.title.asc())
+    else:  # default: created_desc — use id as creation-order proxy
+        stmt = stmt.order_by(Note.id.desc())
+
+    # Apply pagination
+    stmt = stmt.offset((page - 1) * page_size).limit(page_size)
+    rows = db.execute(stmt).scalars().all()
+
+    return NoteSearchPage(
+        items=[NoteRead.model_validate(row) for row in rows],
+        total=total,
+        page=page,
+        page_size=page_size,
+    )
 
 
 @router.get("/{note_id}", response_model=NoteRead)

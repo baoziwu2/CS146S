@@ -19,6 +19,13 @@ class NoteRead(BaseModel):
     content: str
 
 
+class NoteSearchPage(BaseModel):
+    items: list[NoteRead]
+    total: int
+    page: int
+    page_size: int
+
+
 class ActionItemCreate(BaseModel):
     description: str
 
