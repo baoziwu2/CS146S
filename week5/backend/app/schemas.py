@@ -36,3 +36,7 @@ class ActionItemRead(BaseModel):
     id: int
     description: str
     completed: bool
+
+
+class BulkCompleteRequest(BaseModel):
+    ids: list[int]

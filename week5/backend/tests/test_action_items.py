@@ -21,7 +21,7 @@ def test_create_and_complete_action_item(client):
 
 def test_filter_completed_action_items(client):
     """GET /action-items?completed=true returns only completed items."""
-    r1 = client.post("/action-items/", json={"description": "Pending task"})
+    client.post("/action-items/", json={"description": "Pending task"})
     r2 = client.post("/action-items/", json={"description": "Done task"})
     client.put(f"/action-items/{r2.json()['id']}/complete")
 
@@ -34,7 +34,7 @@ def test_filter_completed_action_items(client):
 
 def test_filter_incomplete_action_items(client):
     """GET /action-items?completed=false returns only incomplete items."""
-    r1 = client.post("/action-items/", json={"description": "Pending task"})
+    client.post("/action-items/", json={"description": "Pending task"})
     r2 = client.post("/action-items/", json={"description": "Done task"})
     client.put(f"/action-items/{r2.json()['id']}/complete")
 
@@ -47,7 +47,7 @@ def test_filter_incomplete_action_items(client):
 
 def test_list_all_action_items_no_filter(client):
     """GET /action-items with no filter returns all items regardless of status."""
-    r1 = client.post("/action-items/", json={"description": "Pending"})
+    client.post("/action-items/", json={"description": "Pending"})
     r2 = client.post("/action-items/", json={"description": "Done"})
     client.put(f"/action-items/{r2.json()['id']}/complete")
 
