@@ -15,11 +15,11 @@ const NotesList = forwardRef(function NotesList({ tagId = null, onTagsChanged },
 
   async function loadNotes() {
     if (tagId !== null) {
-      // Tag filter: use the search endpoint with tag_id
-      const params = new URLSearchParams({ tag_id: tagId, page_size: 100 })
-      const res = await fetch(`/notes/search/?${params}`)
+      // Tag filter: use list endpoint with tag_id
+      const params = new URLSearchParams({ tag_id: tagId })
+      const res = await fetch(`/notes/?${params}`)
       if (!res.ok) return
-      setNotes((await res.json()).items)
+      setNotes(await res.json())
     } else {
       const res = await fetch('/notes/')
       if (!res.ok) return
@@ -38,6 +38,7 @@ const NotesList = forwardRef(function NotesList({ tagId = null, onTagsChanged },
 
   useEffect(() => {
     loadNotes()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tagId])
 
   useImperativeHandle(ref, () => ({
@@ -93,9 +94,9 @@ const NotesList = forwardRef(function NotesList({ tagId = null, onTagsChanged },
     if (!res.ok) {
       setNotes(prevNotes)
       setSearchResults(prevSearch)
-      setEditingId(id)
+      setEditingId(id) // reopen the edit form with the original values still in state
     } else if (/#\w/.test(editTitle) || /#\w/.test(editContent) || /- \[ \]/.test(editContent)) {
-      // Auto-extract #hashtags and - [ ] tasks; reload to reflect new tags
+      // Auto-extract #hashtags and - [ ] tasks after a successful save
       await fetch(`/notes/${id}/extract?apply=true`, { method: 'POST' })
       loadNotes()
       onTagsChanged?.()
