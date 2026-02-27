@@ -66,26 +66,37 @@ const ActionItemsList = forwardRef(function ActionItemsList(_, ref) {
 
   return (
     <>
-      <div role="group" aria-label="Filter action items">
+      <div className="filter-bar" role="group" aria-label="Filter action items">
         {FILTERS.map(({ key, label }) => (
-          <button key={key} onClick={() => handleFilterChange(key)} aria-pressed={filter === key}>
+          <button
+            key={key}
+            className="btn btn-ghost btn-sm btn-pill"
+            onClick={() => handleFilterChange(key)}
+            aria-pressed={filter === key}
+          >
             {label}
           </button>
         ))}
       </div>
 
       {selectedIds.size > 0 && (
-        <button onClick={handleBulkComplete}>
-          Complete Selected ({selectedIds.size})
-        </button>
+        <div className="bulk-bar">
+          <span>{selectedIds.size} selected</span>
+          <button className="btn btn-success btn-sm" onClick={handleBulkComplete}>
+            ✓ Complete Selected
+          </button>
+        </div>
       )}
 
       {results.items.length === 0 ? (
-        <p>No action items yet.</p>
+        <div className="empty-state">
+          <span className="empty-state-icon">✅</span>
+          {filter === 'done' ? 'Nothing completed yet.' : 'No action items yet.'}
+        </div>
       ) : (
-        <ul>
+        <div className="action-list">
           {results.items.map((item) => (
-            <li key={item.id}>
+            <div key={item.id} className={`action-item${item.completed ? ' action-done' : ''}`}>
               {!item.completed && (
                 <input
                   type="checkbox"
@@ -94,28 +105,43 @@ const ActionItemsList = forwardRef(function ActionItemsList(_, ref) {
                   aria-label={`Select ${item.description}`}
                 />
               )}
-              <span>{item.description}</span>
-              {' '}
-              [{item.completed ? 'done' : 'open'}]
+              {item.completed && <span style={{ width: '1rem', flexShrink: 0 }} />}
+              <span className="action-desc">{item.description}</span>
+              <span className={`action-badge ${item.completed ? 'action-badge-done' : 'action-badge-open'}`}>
+                {item.completed ? 'done' : 'open'}
+              </span>
               {!item.completed && (
-                <button onClick={() => handleComplete(item.id)}>Complete</button>
+                <button
+                  className="btn btn-success btn-sm"
+                  onClick={() => handleComplete(item.id)}
+                  title="Mark complete"
+                >
+                  ✓
+                </button>
               )}
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
 
       {totalPages > 1 && (
-        <div>
-          <button disabled={page <= 1} onClick={() => loadItems(filter, page - 1)}>
-            Prev
+        <div className="pagination">
+          <button
+            className="btn btn-ghost btn-sm"
+            disabled={page <= 1}
+            onClick={() => loadItems(filter, page - 1)}
+          >
+            ← Prev
           </button>
-          <span>
-            {' '}
-            Page {page} of {totalPages}{' '}
+          <span className="pagination-label">
+            {page} / {totalPages}
           </span>
-          <button disabled={page >= totalPages} onClick={() => loadItems(filter, page + 1)}>
-            Next
+          <button
+            className="btn btn-ghost btn-sm"
+            disabled={page >= totalPages}
+            onClick={() => loadItems(filter, page + 1)}
+          >
+            Next →
           </button>
         </div>
       )}

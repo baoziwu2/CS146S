@@ -93,63 +93,102 @@ const NotesList = forwardRef(function NotesList({ tagId = null, onTagsChanged },
 
   return (
     <>
-      <input
-        type="search"
-        placeholder="Search notes…"
-        value={query}
-        onChange={handleQueryChange}
-        aria-label="Search notes"
-      />
+      <div className="search-wrap">
+        <span className="search-icon">🔍</span>
+        <input
+          type="search"
+          placeholder="Search notes…"
+          value={query}
+          onChange={handleQueryChange}
+          aria-label="Search notes"
+        />
+      </div>
 
       {isSearching && (
-        <p>
+        <p className="search-results-label">
           {results.total} result{results.total !== 1 ? 's' : ''} for &ldquo;{query}&rdquo;
         </p>
       )}
 
       {results.items.length === 0 ? (
-        <p>{isSearching ? 'No matching notes.' : 'No notes yet.'}</p>
+        <div className="empty-state">
+          <span className="empty-state-icon">{isSearching ? '🔍' : '🗒️'}</span>
+          {isSearching ? 'No matching notes.' : 'No notes yet. Add one above!'}
+        </div>
       ) : (
-        <ul>
+        <div className="notes-list">
           {results.items.map((note) =>
             editingId === note.id ? (
-              <li key={note.id}>
-                <input value={editTitle} onChange={(e) => setEditTitle(e.target.value)} />
-                <input value={editContent} onChange={(e) => setEditContent(e.target.value)} />
-                <button onClick={() => handleSave(note.id)}>Save</button>
-                <button onClick={() => setEditingId(null)}>Cancel</button>
-              </li>
+              <div key={note.id} className="note-card note-edit-form">
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  aria-label="Edit title"
+                />
+                <textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  aria-label="Edit content"
+                />
+                <div className="note-edit-actions">
+                  <button className="btn btn-ghost btn-sm" onClick={() => setEditingId(null)}>
+                    Cancel
+                  </button>
+                  <button className="btn btn-primary btn-sm" onClick={() => handleSave(note.id)}>
+                    Save
+                  </button>
+                </div>
+              </div>
             ) : (
-              <li key={note.id}>
-                <strong>{note.title}</strong>: {note.content}
-                {note.tags?.length > 0 && (
-                  <span aria-label="tags">
-                    {note.tags.map((t) => (
+              <div key={note.id} className="note-card">
+                <div className="note-title">{note.title}</div>
+                <div className="note-content">{note.content}</div>
+                <div className="note-footer">
+                  <div className="note-tags" aria-label="tags">
+                    {note.tags?.map((t) => (
                       <span key={t.id} className="tag-chip">
-                        {t.name}
+                        #{t.name}
                       </span>
                     ))}
-                  </span>
-                )}
-                <button onClick={() => startEdit(note)}>Edit</button>
-                <button onClick={() => handleDelete(note.id)}>Delete</button>
-              </li>
+                  </div>
+                  <div className="note-actions">
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => startEdit(note)}
+                      title="Edit"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      className="btn btn-danger-ghost btn-sm"
+                      onClick={() => handleDelete(note.id)}
+                      title="Delete"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              </div>
             )
           )}
-        </ul>
+        </div>
       )}
 
       {totalPages > 1 && (
-        <div>
-          <button disabled={page <= 1} onClick={() => goToPage(page - 1)}>
-            Prev
+        <div className="pagination">
+          <button className="btn btn-ghost btn-sm" disabled={page <= 1} onClick={() => goToPage(page - 1)}>
+            ← Prev
           </button>
-          <span>
-            {' '}
-            Page {page} of {totalPages}{' '}
+          <span className="pagination-label">
+            {page} / {totalPages}
           </span>
-          <button disabled={page >= totalPages} onClick={() => goToPage(page + 1)}>
-            Next
+          <button
+            className="btn btn-ghost btn-sm"
+            disabled={page >= totalPages}
+            onClick={() => goToPage(page + 1)}
+          >
+            Next →
           </button>
         </div>
       )}

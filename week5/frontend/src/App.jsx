@@ -21,46 +21,65 @@ export default function App() {
   }, [])
 
   return (
-    <main>
-      <h1>Modern Software Dev Starter</h1>
+    <>
+      <header className="app-header">
+        <span className="app-header-icon">📝</span>
+        <h1>Modern Software Dev Starter</h1>
+      </header>
 
-      <section>
-        <h2>Notes</h2>
-        <NoteForm
-          onCreated={() => {
-            notesListRef.current?.reload()
-            reloadTags()
-          }}
-        />
-
-        {tags.length > 0 && (
-          <div role="group" aria-label="Filter notes by tag">
-            <button
-              onClick={() => setSelectedTagId(null)}
-              aria-pressed={selectedTagId === null}
-            >
-              All tags
-            </button>
-            {tags.map((tag) => (
-              <button
-                key={tag.id}
-                onClick={() => setSelectedTagId(tag.id)}
-                aria-pressed={selectedTagId === tag.id}
-              >
-                #{tag.name}
-              </button>
-            ))}
+      <div className="app-body">
+        {/* ── Notes column ── */}
+        <section className="card">
+          <div className="card-header">
+            <span className="card-header-icon">🗒️</span>
+            <h2>Notes</h2>
           </div>
-        )}
+          <div className="card-body">
+            <NoteForm
+              onCreated={() => {
+                notesListRef.current?.reload()
+                reloadTags()
+              }}
+            />
 
-        <NotesList ref={notesListRef} tagId={selectedTagId} onTagsChanged={reloadTags} />
-      </section>
+            {tags.length > 0 && (
+              <div className="filter-bar" role="group" aria-label="Filter notes by tag">
+                <button
+                  className="btn btn-ghost btn-sm btn-pill"
+                  onClick={() => setSelectedTagId(null)}
+                  aria-pressed={selectedTagId === null}
+                >
+                  All tags
+                </button>
+                {tags.map((tag) => (
+                  <button
+                    key={tag.id}
+                    className="btn btn-ghost btn-sm btn-pill"
+                    onClick={() => setSelectedTagId(tag.id)}
+                    aria-pressed={selectedTagId === tag.id}
+                  >
+                    #{tag.name}
+                  </button>
+                ))}
+              </div>
+            )}
 
-      <section>
-        <h2>Action Items</h2>
-        <ActionItemForm onCreated={() => actionsListRef.current?.reload()} />
-        <ActionItemsList ref={actionsListRef} />
-      </section>
-    </main>
+            <NotesList ref={notesListRef} tagId={selectedTagId} onTagsChanged={reloadTags} />
+          </div>
+        </section>
+
+        {/* ── Action Items column ── */}
+        <section className="card">
+          <div className="card-header">
+            <span className="card-header-icon">✅</span>
+            <h2>Action Items</h2>
+          </div>
+          <div className="card-body">
+            <ActionItemForm onCreated={() => actionsListRef.current?.reload()} />
+            <ActionItemsList ref={actionsListRef} />
+          </div>
+        </section>
+      </div>
+    </>
   )
 }

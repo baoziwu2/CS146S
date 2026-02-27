@@ -16,14 +16,18 @@ export default function ActionItemForm({ onCreated }) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="form-row" style={{ marginBottom: '1rem' }}>
       <input
-        placeholder="Description"
+        type="text"
+        placeholder="New action item…"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         required
+        aria-label="Action item description"
       />
-      <button type="submit">Add Action Item</button>
+      <button type="submit" className="btn btn-primary">
+        + Add
+      </button>
     </form>
   )
 }

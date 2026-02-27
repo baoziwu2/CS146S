@@ -23,20 +23,27 @@ export default function NoteForm({ onCreated }) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="form-stack" style={{ marginBottom: '1rem' }}>
       <input
+        type="text"
         placeholder="Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         required
+        aria-label="Note title"
       />
-      <input
-        placeholder="Content"
+      <textarea
+        placeholder="Content — use #hashtag for tags, - [ ] for tasks"
         value={content}
         onChange={(e) => setContent(e.target.value)}
         required
+        aria-label="Note content"
       />
-      <button type="submit">Add Note</button>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button type="submit" className="btn btn-primary">
+          + Add Note
+        </button>
+      </div>
     </form>
   )
 }
