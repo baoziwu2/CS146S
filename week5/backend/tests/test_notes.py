@@ -277,3 +277,44 @@ def test_list_notes_tag_filter_with_pagination(client):
     data = r.json()["data"]
     assert data["total"] == 1
     assert data["items"][0]["id"] == note_id
+
+
+# ── Additional 404 / edge-case coverage (Task 10) ─────────────────────────────
+
+
+def test_get_nonexistent_note_returns_404(client):
+    """GET /notes/9999 returns 404 with NOT_FOUND error code."""
+    r = client.get("/notes/9999")
+    assert r.status_code == 404
+    body = r.json()
+    assert body["ok"] is False
+    assert body["error"]["code"] == "NOT_FOUND"
+
+
+def test_search_no_results_returns_empty_items(client):
+    """Search with a query that matches nothing returns total=0 and items=[]."""
+    client.post("/notes/", json={"title": "Normal note", "content": "regular content"})
+    r = client.get("/notes/search/", params={"q": "xyzzy_no_match_ever"})
+    assert r.status_code == 200
+    data = r.json()["data"]
+    assert data["total"] == 0
+    assert data["items"] == []
+
+
+def test_search_with_tag_id_filter(client):
+    """Search combined with tag_id filter returns only notes matching both constraints."""
+    tag_id = client.post("/tags/", json={"name": "search_tag"}).json()["data"]["id"]
+
+    tagged_id = client.post(
+        "/notes/", json={"title": "Tagged searchable", "content": "keyword"}
+    ).json()["data"]["id"]
+    client.post(f"/notes/{tagged_id}/tags", json={"tag_id": tag_id})
+
+    # Same keyword, but no tag — must be excluded
+    client.post("/notes/", json={"title": "Untagged searchable", "content": "keyword"})
+
+    r = client.get("/notes/search/", params={"q": "keyword", "tag_id": tag_id})
+    assert r.status_code == 200
+    data = r.json()["data"]
+    assert data["total"] == 1
+    assert data["items"][0]["id"] == tagged_id

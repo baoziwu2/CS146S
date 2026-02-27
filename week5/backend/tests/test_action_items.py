@@ -158,3 +158,44 @@ def test_list_action_items_filter_with_pagination(client):
     data = r.json()["data"]
     assert data["total"] == 2
     assert len(data["items"]) == 1
+
+
+# ── Additional 404 / edge-case coverage (Task 10) ─────────────────────────────
+
+
+def test_complete_nonexistent_action_item_returns_404(client):
+    """PUT /action-items/9999/complete returns 404 with NOT_FOUND error code."""
+    r = client.put("/action-items/9999/complete")
+    assert r.status_code == 404
+    body = r.json()
+    assert body["ok"] is False
+    assert body["error"]["code"] == "NOT_FOUND"
+
+
+def test_create_action_item_with_empty_description_returns_422(client):
+    """POST /action-items/ with an empty description string is rejected with 422."""
+    r = client.post("/action-items/", json={"description": ""})
+    assert r.status_code == 422
+    body = r.json()
+    assert body["ok"] is False
+    assert body["error"]["code"] == "VALIDATION_ERROR"
+
+
+def test_bulk_complete_empty_list_returns_empty_array(client):
+    """POST /action-items/bulk-complete with an empty ids list returns an empty list."""
+    r = client.post("/action-items/bulk-complete", json={"ids": []})
+    assert r.status_code == 200
+    assert r.json()["data"] == []
+
+
+def test_bulk_complete_already_completed_item_is_idempotent(client):
+    """Completing an already-completed item via bulk-complete succeeds and stays completed."""
+    r = client.post("/action-items/", json={"description": "Will be done twice"})
+    item_id = r.json()["data"]["id"]
+    client.put(f"/action-items/{item_id}/complete")
+
+    r = client.post("/action-items/bulk-complete", json={"ids": [item_id]})
+    assert r.status_code == 200
+    result = r.json()["data"]
+    assert len(result) == 1
+    assert result[0]["completed"] is True
