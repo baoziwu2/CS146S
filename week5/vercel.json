@@ -2,6 +2,7 @@
   "framework": null,
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
+  "installCommand": "cd frontend && npm install",
   "rewrites": [
     { "source": "/notes",               "destination": "/api/index" },
     { "source": "/notes/:path*",        "destination": "/api/index" },
