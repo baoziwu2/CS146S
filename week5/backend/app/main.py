@@ -1,7 +1,8 @@
 from pathlib import Path
 
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from .db import apply_seed_if_needed, engine
@@ -11,6 +12,34 @@ from .routers import notes as notes_router
 from .routers import tags as tags_router
 
 app = FastAPI(title="Modern Software Dev Starter (Week 5)")
+
+_HTTP_ERROR_CODES: dict[int, str] = {
+    400: "BAD_REQUEST",
+    401: "UNAUTHORIZED",
+    403: "FORBIDDEN",
+    404: "NOT_FOUND",
+    409: "CONFLICT",
+    422: "VALIDATION_ERROR",
+    500: "INTERNAL_ERROR",
+    503: "SERVICE_UNAVAILABLE",
+}
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    code = _HTTP_ERROR_CODES.get(exc.status_code, "ERROR")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"ok": False, "error": {"code": code, "message": exc.detail}},
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+    return JSONResponse(
+        status_code=422,
+        content={"ok": False, "error": {"code": "VALIDATION_ERROR", "message": str(exc.errors())}},
+    )
 
 # Ensure data dir exists
 Path("data").mkdir(parents=True, exist_ok=True)
