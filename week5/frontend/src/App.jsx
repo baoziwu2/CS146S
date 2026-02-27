@@ -13,7 +13,7 @@ export default function App() {
 
   async function reloadTags() {
     const r = await fetch('/tags/')
-    if (r.ok) setTags(await r.json())
+    if (r.ok) setTags((await r.json()).data)
   }
 
   useEffect(() => {

@@ -19,11 +19,11 @@ const NotesList = forwardRef(function NotesList({ tagId = null, onTagsChanged },
       const params = new URLSearchParams({ tag_id: tagId })
       const res = await fetch(`/notes/?${params}`)
       if (!res.ok) return
-      setNotes(await res.json())
+      setNotes((await res.json()).data)
     } else {
       const res = await fetch('/notes/')
       if (!res.ok) return
-      setNotes(await res.json())
+      setNotes((await res.json()).data)
     }
   }
 
@@ -32,7 +32,7 @@ const NotesList = forwardRef(function NotesList({ tagId = null, onTagsChanged },
     if (tagId !== null) params.set('tag_id', tagId)
     const res = await fetch(`/notes/search/?${params}`)
     if (!res.ok) return
-    setSearchResults(await res.json())
+    setSearchResults((await res.json()).data)
     setPage(p)
   }
 

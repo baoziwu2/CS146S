@@ -12,7 +12,7 @@ export default function NoteForm({ onCreated }) {
       body: JSON.stringify({ title, content }),
     })
     if (!res.ok) return
-    const note = await res.json()
+    const { data: note } = await res.json()
     setTitle('')
     setContent('')
     // Auto-extract #hashtags and - [ ] tasks if any are present

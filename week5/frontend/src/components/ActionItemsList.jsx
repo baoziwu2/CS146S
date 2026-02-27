@@ -15,7 +15,7 @@ const ActionItemsList = forwardRef(function ActionItemsList(_, ref) {
     const { param } = FILTERS.find((x) => x.key === f)
     const res = await fetch(`/action-items/${param}`)
     if (!res.ok) return
-    setItems(await res.json())
+    setItems((await res.json()).data)
     setSelectedIds(new Set())
   }
 
