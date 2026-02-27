@@ -100,7 +100,7 @@ def test_notes_list_includes_tags(client):
 
     r = client.get("/notes/")
     assert r.status_code == 200
-    note = next(n for n in r.json()["data"] if n["id"] == note_id)
+    note = next(n for n in r.json()["data"]["items"] if n["id"] == note_id)
     assert "tags" in note
     assert any(t["name"] == "listed" for t in note["tags"])
 
@@ -144,7 +144,7 @@ def test_filter_notes_by_tag(client):
 
     r = client.get("/notes/", params={"tag_id": tag_id})
     assert r.status_code == 200
-    items = r.json()["data"]
+    items = r.json()["data"]["items"]
     assert len(items) == 1
     assert items[0]["id"] == note1_id
 

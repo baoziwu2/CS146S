@@ -67,7 +67,7 @@ def test_extract_endpoint_apply_false_does_not_persist(client):
     assert r.status_code == 200
     assert not any(t["name"] == "newtag" for t in client.get("/tags/").json()["data"])
     assert not any(
-        i["description"] == "new task" for i in client.get("/action-items/").json()["data"]
+        i["description"] == "new task" for i in client.get("/action-items/").json()["data"]["items"]
     )
 
 
@@ -79,7 +79,9 @@ def test_extract_endpoint_apply_true_persists_tags_and_actions(client):
     assert r.status_code == 200
     note = client.get(f"/notes/{note_id}").json()["data"]
     assert any(t["name"] == "mytag" for t in note["tags"])
-    assert any(i["description"] == "my task" for i in client.get("/action-items/").json()["data"])
+    assert any(
+        i["description"] == "my task" for i in client.get("/action-items/").json()["data"]["items"]
+    )
 
 
 def test_extract_endpoint_apply_true_idempotent_tag(client):

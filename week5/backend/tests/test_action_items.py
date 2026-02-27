@@ -12,7 +12,7 @@ def test_create_and_complete_action_item(client):
 
     r = client.get("/action-items/")
     assert r.status_code == 200
-    items = r.json()["data"]
+    items = r.json()["data"]["items"]
     assert len(items) == 1
 
 
@@ -27,7 +27,7 @@ def test_filter_completed_action_items(client):
 
     r = client.get("/action-items/", params={"completed": "true"})
     assert r.status_code == 200
-    items = r.json()["data"]
+    items = r.json()["data"]["items"]
     assert len(items) == 1
     assert items[0]["completed"] is True
 
@@ -40,7 +40,7 @@ def test_filter_incomplete_action_items(client):
 
     r = client.get("/action-items/", params={"completed": "false"})
     assert r.status_code == 200
-    items = r.json()["data"]
+    items = r.json()["data"]["items"]
     assert len(items) == 1
     assert items[0]["completed"] is False
 
@@ -53,7 +53,7 @@ def test_list_all_action_items_no_filter(client):
 
     r = client.get("/action-items/")
     assert r.status_code == 200
-    assert len(r.json()["data"]) == 2
+    assert len(r.json()["data"]["items"]) == 2
 
 
 # ── Bulk complete (Task 4) ─────────────────────────────────────────────────────
@@ -92,5 +92,69 @@ def test_bulk_complete_rolls_back_on_invalid_id(client):
 
     # valid_id must still be incomplete — the whole transaction rolled back
     r = client.get("/action-items/")
-    all_items = {i["id"]: i for i in r.json()["data"]}
+    all_items = {i["id"]: i for i in r.json()["data"]["items"]}
     assert all_items[valid_id]["completed"] is False
+
+
+# ── List endpoint pagination (Task 8) ─────────────────────────────────────────
+
+
+def test_list_action_items_returns_paginated_envelope(client):
+    """GET /action-items/ returns {items, total, page, page_size} inside data."""
+    client.post("/action-items/", json={"description": "Task"})
+    r = client.get("/action-items/")
+    assert r.status_code == 200
+    assert r.json()["ok"] is True
+    data = r.json()["data"]
+    assert "items" in data
+    assert "total" in data
+    assert "page" in data
+    assert "page_size" in data
+
+
+def test_list_action_items_pagination_limits_results(client):
+    """page_size=2 with 3 items returns only 2 items with correct total."""
+    for i in range(3):
+        client.post("/action-items/", json={"description": f"Item {i}"})
+    r = client.get("/action-items/", params={"page": 1, "page_size": 2})
+    assert r.status_code == 200
+    data = r.json()["data"]
+    assert len(data["items"]) == 2
+    assert data["total"] == 3
+    assert data["page"] == 1
+    assert data["page_size"] == 2
+
+
+def test_list_action_items_page_2_returns_remaining(client):
+    """Page 2 returns the remaining items."""
+    for i in range(3):
+        client.post("/action-items/", json={"description": f"Item {i}"})
+    r = client.get("/action-items/", params={"page": 2, "page_size": 2})
+    assert r.status_code == 200
+    data = r.json()["data"]
+    assert len(data["items"]) == 1
+    assert data["total"] == 3
+
+
+def test_list_action_items_empty_page_beyond_total(client):
+    """Requesting a page beyond the last returns empty items and correct total."""
+    client.post("/action-items/", json={"description": "Only item"})
+    r = client.get("/action-items/", params={"page": 99, "page_size": 10})
+    assert r.status_code == 200
+    data = r.json()["data"]
+    assert data["items"] == []
+    assert data["total"] == 1
+
+
+def test_list_action_items_filter_with_pagination(client):
+    """completed filter combined with pagination returns correct subset and total."""
+    client.post("/action-items/", json={"description": "Pending 1"})
+    client.post("/action-items/", json={"description": "Pending 2"})
+    r2 = client.post("/action-items/", json={"description": "Done"})
+    client.put(f"/action-items/{r2.json()['data']['id']}/complete")
+
+    r = client.get("/action-items/", params={"completed": "false", "page": 1, "page_size": 1})
+    assert r.status_code == 200
+    data = r.json()["data"]
+    assert data["total"] == 2
+    assert len(data["items"]) == 1

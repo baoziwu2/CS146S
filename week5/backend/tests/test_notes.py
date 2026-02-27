@@ -9,7 +9,7 @@ def test_create_and_list_notes(client):
 
     r = client.get("/notes/")
     assert r.status_code == 200
-    items = r.json()["data"]
+    items = r.json()["data"]["items"]
     assert len(items) >= 1
 
     r = client.get("/notes/search/")
@@ -213,3 +213,67 @@ def test_update_note_with_empty_content_returns_422(client):
     r = client.put(f"/notes/{note_id}", json={"title": "Original", "content": ""})
     assert r.status_code == 422
     assert r.json()["ok"] is False
+
+
+# ── List endpoint pagination (Task 8) ─────────────────────────────────────────
+
+
+def test_list_notes_returns_paginated_envelope(client):
+    """GET /notes/ returns {items, total, page, page_size} inside data."""
+    client.post("/notes/", json={"title": "A note", "content": "content"})
+    r = client.get("/notes/")
+    assert r.status_code == 200
+    assert r.json()["ok"] is True
+    data = r.json()["data"]
+    assert "items" in data
+    assert "total" in data
+    assert "page" in data
+    assert "page_size" in data
+
+
+def test_list_notes_pagination_limits_results(client):
+    """page_size=2 with 3 notes returns only 2 items with correct total."""
+    for i in range(3):
+        client.post("/notes/", json={"title": f"List note {i}", "content": "listpag"})
+    r = client.get("/notes/", params={"page": 1, "page_size": 2})
+    assert r.status_code == 200
+    data = r.json()["data"]
+    assert len(data["items"]) == 2
+    assert data["total"] == 3
+    assert data["page"] == 1
+    assert data["page_size"] == 2
+
+
+def test_list_notes_page_2_returns_remaining(client):
+    """Page 2 of the list returns the remaining notes."""
+    for i in range(3):
+        client.post("/notes/", json={"title": f"List2 note {i}", "content": "listpag2"})
+    r = client.get("/notes/", params={"page": 2, "page_size": 2})
+    assert r.status_code == 200
+    data = r.json()["data"]
+    assert len(data["items"]) == 1
+    assert data["total"] == 3
+
+
+def test_list_notes_empty_page_beyond_total(client):
+    """Requesting a page beyond the last returns empty items and correct total."""
+    client.post("/notes/", json={"title": "Only note", "content": "content"})
+    r = client.get("/notes/", params={"page": 99, "page_size": 10})
+    assert r.status_code == 200
+    data = r.json()["data"]
+    assert data["items"] == []
+    assert data["total"] == 1
+
+
+def test_list_notes_tag_filter_with_pagination(client):
+    """tag_id filter combined with pagination returns correct subset and total."""
+    note_id = client.post("/notes/", json={"title": "Tagged", "content": "c"}).json()["data"]["id"]
+    client.post("/notes/", json={"title": "Untagged", "content": "c"})
+    tag_id = client.post("/tags/", json={"name": "listpag_tag"}).json()["data"]["id"]
+    client.post(f"/notes/{note_id}/tags", json={"tag_id": tag_id})
+
+    r = client.get("/notes/", params={"tag_id": tag_id, "page": 1, "page_size": 10})
+    assert r.status_code == 200
+    data = r.json()["data"]
+    assert data["total"] == 1
+    assert data["items"][0]["id"] == note_id
