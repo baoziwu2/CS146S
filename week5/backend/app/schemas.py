@@ -48,7 +48,7 @@ class ExtractionResult(BaseModel):
 
 
 class ActionItemCreate(BaseModel):
-    description: str
+    description: str = Field(min_length=1)
 
 
 class ActionItemRead(BaseModel):
