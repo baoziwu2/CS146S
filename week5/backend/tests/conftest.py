@@ -12,6 +12,21 @@ from sqlalchemy.orm import sessionmaker
 
 
 @pytest.fixture()
+def db_engine():
+    """Yields a fresh SQLite engine with the full schema applied — for schema inspection tests."""
+    db_fd, db_path = tempfile.mkstemp()
+    os.close(db_fd)
+    engine = create_engine(f"sqlite:///{db_path}", connect_args={"check_same_thread": False})
+    Base.metadata.create_all(bind=engine)
+    yield engine
+    engine.dispose()
+    try:
+        os.unlink(db_path)
+    except PermissionError:
+        pass
+
+
+@pytest.fixture()
 def client() -> Generator[TestClient, None, None]:
     db_fd, db_path = tempfile.mkstemp()
     os.close(db_fd)
