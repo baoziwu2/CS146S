@@ -1,7 +1,9 @@
+import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -12,6 +14,17 @@ from .routers import notes as notes_router
 from .routers import tags as tags_router
 
 app = FastAPI(title="Modern Software Dev Starter (Week 5)")
+
+# CORS — allow the Vite dev server and any Vercel deployment origin.
+# Override via CORS_ORIGINS env var (comma-separated) for stricter production settings.
+_cors_origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",")]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 _HTTP_ERROR_CODES: dict[int, str] = {
     400: "BAD_REQUEST",
@@ -35,11 +48,14 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
 
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+async def validation_exception_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
     return JSONResponse(
         status_code=422,
         content={"ok": False, "error": {"code": "VALIDATION_ERROR", "message": str(exc.errors())}},
     )
+
 
 # Ensure data dir exists
 Path("data").mkdir(parents=True, exist_ok=True)

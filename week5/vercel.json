@@ -1,0 +1,18 @@
+{
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
+  "installCommand": "pip install -r requirements.txt",
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/notes",              "destination": "/api/index" },
+    { "source": "/notes/:path*",       "destination": "/api/index" },
+    { "source": "/action-items",       "destination": "/api/index" },
+    { "source": "/action-items/:path*","destination": "/api/index" },
+    { "source": "/tags",               "destination": "/api/index" },
+    { "source": "/tags/:path*",        "destination": "/api/index" }
+  ]
+}

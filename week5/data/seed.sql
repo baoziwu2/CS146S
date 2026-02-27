@@ -78,15 +78,15 @@ INSERT INTO note_tags (note_id, tag_id) VALUES
   (5, (SELECT id FROM tags WHERE name='database')),
   (5, (SELECT id FROM tags WHERE name='backend'));
 
--- Action items
+-- Action items (use FALSE/TRUE — compatible with both SQLite 3.23+ and Postgres)
 INSERT INTO action_items (description, completed) VALUES
-  ('Explore the Notes section', 0),
-  ('Try the tag filter bar', 0),
-  ('Add dependency injection with Depends()', 0),
-  ('Run npm install in frontend/', 0),
-  ('Start dev server with npm run dev', 0),
-  ('Tags many-to-many', 1),
-  ('Extraction service', 1),
-  ('Frontend tag chips', 0),
-  ('Use EXPLAIN QUERY PLAN to check indexes', 0),
-  ('CASCADE deletes keep join tables clean', 0);
+  ('Explore the Notes section', FALSE),
+  ('Try the tag filter bar', FALSE),
+  ('Add dependency injection with Depends()', FALSE),
+  ('Run npm install in frontend/', FALSE),
+  ('Start dev server with npm run dev', FALSE),
+  ('Tags many-to-many', TRUE),
+  ('Extraction service', TRUE),
+  ('Frontend tag chips', FALSE),
+  ('Use EXPLAIN QUERY PLAN to check indexes', FALSE),
+  ('CASCADE deletes keep join tables clean', FALSE);

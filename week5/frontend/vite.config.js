@@ -15,6 +15,7 @@ export default defineConfig({
     proxy: {
       '/notes': 'http://localhost:8000',
       '/action-items': 'http://localhost:8000',
+      '/tags': 'http://localhost:8000',
     },
   },
 })
