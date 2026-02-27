@@ -61,3 +61,10 @@ class ActionItemRead(BaseModel):
 
 class BulkCompleteRequest(BaseModel):
     ids: list[int]
+
+
+class ActionItemsPage(BaseModel):
+    items: list[ActionItemRead]
+    total: int
+    page: int
+    page_size: int

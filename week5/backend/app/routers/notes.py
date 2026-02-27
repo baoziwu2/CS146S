@@ -18,14 +18,30 @@ from ..services.extract import extract_tags, extract_tasks
 
 router = APIRouter(prefix="/notes", tags=["notes"])
 
+_DEFAULT_PAGE_SIZE = 10
+
 
 @router.get("/")
-def list_notes(tag_id: int | None = None, db: Session = Depends(get_db)) -> JSONResponse:
+def list_notes(
+    tag_id: int | None = None,
+    page: int = 1,
+    page_size: int = _DEFAULT_PAGE_SIZE,
+    db: Session = Depends(get_db),
+) -> JSONResponse:
     stmt = select(Note)
     if tag_id is not None:
         stmt = stmt.join(Note.tags).where(Tag.id == tag_id)
+    total: int = db.execute(select(func.count()).select_from(stmt.subquery())).scalar_one()
+    stmt = stmt.order_by(Note.id.desc()).offset((page - 1) * page_size).limit(page_size)
     rows = db.execute(stmt).scalars().all()
-    return api_ok([NoteRead.model_validate(row) for row in rows])
+    return api_ok(
+        NoteSearchPage(
+            items=[NoteRead.model_validate(row) for row in rows],
+            total=total,
+            page=page,
+            page_size=page_size,
+        )
+    )
 
 
 @router.post("/", status_code=201)
