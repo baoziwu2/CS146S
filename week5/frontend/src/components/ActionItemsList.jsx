@@ -1,5 +1,7 @@
 import { useState, useEffect, useImperativeHandle, forwardRef } from 'react'
 
+const PAGE_SIZE = 10
+
 const FILTERS = [
   { key: 'all', label: 'All', param: '' },
   { key: 'pending', label: 'Pending', param: '?completed=false' },
@@ -7,16 +9,19 @@ const FILTERS = [
 ]
 
 const ActionItemsList = forwardRef(function ActionItemsList(_, ref) {
-  const [items, setItems] = useState([])
+  const [results, setResults] = useState({ items: [], total: 0, page: 1, page_size: PAGE_SIZE })
   const [filter, setFilter] = useState('all')
   const [selectedIds, setSelectedIds] = useState(new Set())
+  const [page, setPage] = useState(1)
 
-  async function loadItems(f = filter) {
+  async function loadItems(f = filter, p = 1) {
     const { param } = FILTERS.find((x) => x.key === f)
-    const res = await fetch(`/action-items/${param}`)
+    const sep = param ? '&' : '?'
+    const res = await fetch(`/action-items/${param}${sep}page=${p}&page_size=${PAGE_SIZE}`)
     if (!res.ok) return
-    setItems((await res.json()).data)
+    setResults((await res.json()).data)
     setSelectedIds(new Set())
+    setPage(p)
   }
 
   useEffect(() => {
@@ -24,12 +29,12 @@ const ActionItemsList = forwardRef(function ActionItemsList(_, ref) {
   }, [])
 
   useImperativeHandle(ref, () => ({
-    reload: () => loadItems(),
+    reload: () => loadItems(filter, page),
   }))
 
   async function handleComplete(id) {
     await fetch(`/action-items/${id}/complete`, { method: 'PUT' })
-    loadItems()
+    loadItems(filter, page)
   }
 
   async function handleBulkComplete() {
@@ -39,12 +44,13 @@ const ActionItemsList = forwardRef(function ActionItemsList(_, ref) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ids: [...selectedIds] }),
     })
-    if (res.ok) loadItems()
+    if (res.ok) loadItems(filter, page)
   }
 
   function handleFilterChange(f) {
     setFilter(f)
-    loadItems(f)
+    setPage(1)
+    loadItems(f, 1)
   }
 
   function toggleSelect(id) {
@@ -55,6 +61,8 @@ const ActionItemsList = forwardRef(function ActionItemsList(_, ref) {
       return next
     })
   }
+
+  const totalPages = Math.ceil(results.total / PAGE_SIZE)
 
   return (
     <>
@@ -72,11 +80,11 @@ const ActionItemsList = forwardRef(function ActionItemsList(_, ref) {
         </button>
       )}
 
-      {items.length === 0 ? (
+      {results.items.length === 0 ? (
         <p>No action items yet.</p>
       ) : (
         <ul>
-          {items.map((item) => (
+          {results.items.map((item) => (
             <li key={item.id}>
               {!item.completed && (
                 <input
@@ -95,6 +103,21 @@ const ActionItemsList = forwardRef(function ActionItemsList(_, ref) {
             </li>
           ))}
         </ul>
+      )}
+
+      {totalPages > 1 && (
+        <div>
+          <button disabled={page <= 1} onClick={() => loadItems(filter, page - 1)}>
+            Prev
+          </button>
+          <span>
+            {' '}
+            Page {page} of {totalPages}{' '}
+          </span>
+          <button disabled={page >= totalPages} onClick={() => loadItems(filter, page + 1)}>
+            Next
+          </button>
+        </div>
       )}
     </>
   )
