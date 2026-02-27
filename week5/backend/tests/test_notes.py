@@ -2,12 +2,14 @@ def test_create_and_list_notes(client):
     payload = {"title": "Test", "content": "Hello world"}
     r = client.post("/notes/", json=payload)
     assert r.status_code == 201, r.text
-    data = r.json()
+    body = r.json()
+    assert body["ok"] is True
+    data = body["data"]
     assert data["title"] == "Test"
 
     r = client.get("/notes/")
     assert r.status_code == 200
-    items = r.json()
+    items = r.json()["data"]
     assert len(items) >= 1
 
     r = client.get("/notes/search/")
@@ -15,18 +17,18 @@ def test_create_and_list_notes(client):
 
     r = client.get("/notes/search/", params={"q": "Hello"})
     assert r.status_code == 200
-    data = r.json()
+    data = r.json()["data"]
     assert data["total"] >= 1
 
 
 def test_update_note_returns_updated_data(client):
     r = client.post("/notes/", json={"title": "Original", "content": "Old content"})
     assert r.status_code == 201
-    note_id = r.json()["id"]
+    note_id = r.json()["data"]["id"]
 
     r = client.put(f"/notes/{note_id}", json={"title": "Updated", "content": "New content"})
     assert r.status_code == 200, r.text
-    data = r.json()
+    data = r.json()["data"]
     assert data["title"] == "Updated"
     assert data["content"] == "New content"
     assert data["id"] == note_id
@@ -35,12 +37,15 @@ def test_update_note_returns_updated_data(client):
 def test_update_nonexistent_note_returns_404(client):
     r = client.put("/notes/9999", json={"title": "X", "content": "Y"})
     assert r.status_code == 404
+    body = r.json()
+    assert body["ok"] is False
+    assert body["error"]["code"] == "NOT_FOUND"
 
 
 def test_delete_note_returns_204(client):
     r = client.post("/notes/", json={"title": "To delete", "content": "Bye"})
     assert r.status_code == 201
-    note_id = r.json()["id"]
+    note_id = r.json()["data"]["id"]
 
     r = client.delete(f"/notes/{note_id}")
     assert r.status_code == 204
@@ -52,17 +57,21 @@ def test_delete_note_returns_204(client):
 def test_delete_nonexistent_note_returns_404(client):
     r = client.delete("/notes/9999")
     assert r.status_code == 404
+    body = r.json()
+    assert body["ok"] is False
+    assert body["error"]["code"] == "NOT_FOUND"
 
 
 # ── Search: pagination & sorting (Task 2) ─────────────────────────────────────
 
 
 def test_search_returns_paginated_envelope(client):
-    """Search endpoint returns {items, total, page, page_size} envelope."""
+    """Search endpoint returns {items, total, page, page_size} inside data."""
     client.post("/notes/", json={"title": "Envelope note", "content": "envelope check"})
     r = client.get("/notes/search/", params={"q": "envelope check"})
     assert r.status_code == 200
-    data = r.json()
+    assert r.json()["ok"] is True
+    data = r.json()["data"]
     assert "items" in data
     assert "total" in data
     assert "page" in data
@@ -75,7 +84,7 @@ def test_search_pagination_limits_results(client):
         client.post("/notes/", json={"title": f"Page note {i}", "content": "paginate me"})
     r = client.get("/notes/search/", params={"q": "paginate me", "page": 1, "page_size": 2})
     assert r.status_code == 200
-    data = r.json()
+    data = r.json()["data"]
     assert len(data["items"]) == 2
     assert data["total"] == 3
     assert data["page"] == 1
@@ -88,7 +97,7 @@ def test_search_page_2_returns_remaining(client):
         client.post("/notes/", json={"title": f"Page2 note {i}", "content": "paginate2"})
     r = client.get("/notes/search/", params={"q": "paginate2", "page": 2, "page_size": 2})
     assert r.status_code == 200
-    data = r.json()
+    data = r.json()["data"]
     assert len(data["items"]) == 1
     assert data["total"] == 3
 
@@ -98,14 +107,14 @@ def test_search_case_insensitive(client):
     client.post("/notes/", json={"title": "CaseSensitive Title", "content": "mixed content"})
     r = client.get("/notes/search/", params={"q": "casesensitive"})
     assert r.status_code == 200
-    data = r.json()
+    data = r.json()["data"]
     assert data["total"] >= 1
     assert any("CaseSensitive" in item["title"] for item in data["items"])
 
     # Also match against content, case-insensitively
     r2 = client.get("/notes/search/", params={"q": "MIXED CONTENT"})
     assert r2.status_code == 200
-    data2 = r2.json()
+    data2 = r2.json()["data"]
     assert data2["total"] >= 1
 
 
@@ -116,7 +125,7 @@ def test_search_sort_title_asc(client):
     client.post("/notes/", json={"title": "Mango note", "content": "sort test"})
     r = client.get("/notes/search/", params={"q": "sort test", "sort": "title_asc"})
     assert r.status_code == 200
-    titles = [item["title"] for item in r.json()["items"]]
+    titles = [item["title"] for item in r.json()["data"]["items"]]
     assert titles == sorted(titles)
 
 
@@ -127,7 +136,7 @@ def test_search_sort_created_desc(client):
     client.post("/notes/", json={"title": "Third created", "content": "order test"})
     r = client.get("/notes/search/", params={"q": "order test", "sort": "created_desc"})
     assert r.status_code == 200
-    items = r.json()["items"]
+    items = r.json()["data"]["items"]
     ids = [item["id"] for item in items]
     assert ids == sorted(ids, reverse=True)
 
@@ -138,7 +147,7 @@ def test_search_total_reflects_filter_not_page(client):
         client.post("/notes/", json={"title": f"Total test {i}", "content": "totalcheck"})
     r = client.get("/notes/search/", params={"q": "totalcheck", "page": 1, "page_size": 2})
     assert r.status_code == 200
-    data = r.json()
+    data = r.json()["data"]
     assert data["total"] == 5
     assert len(data["items"]) == 2
 
@@ -148,7 +157,7 @@ def test_search_empty_page_beyond_total(client):
     client.post("/notes/", json={"title": "Only one", "content": "lonely note"})
     r = client.get("/notes/search/", params={"q": "lonely note", "page": 99, "page_size": 10})
     assert r.status_code == 200
-    data = r.json()
+    data = r.json()["data"]
     assert data["items"] == []
     assert data["total"] == 1
 
@@ -157,42 +166,50 @@ def test_search_empty_page_beyond_total(client):
 
 
 def test_create_note_with_empty_title_returns_422(client):
-    """POST /notes/ with an empty title is rejected with 422."""
+    """POST /notes/ with an empty title is rejected with 422 and VALIDATION_ERROR code."""
     r = client.post("/notes/", json={"title": "", "content": "some content"})
     assert r.status_code == 422
+    body = r.json()
+    assert body["ok"] is False
+    assert body["error"]["code"] == "VALIDATION_ERROR"
 
 
 def test_create_note_with_title_too_long_returns_422(client):
     """POST /notes/ with a title exceeding 200 characters is rejected with 422."""
     r = client.post("/notes/", json={"title": "x" * 201, "content": "some content"})
     assert r.status_code == 422
+    assert r.json()["ok"] is False
 
 
 def test_create_note_with_empty_content_returns_422(client):
     """POST /notes/ with empty content is rejected with 422."""
     r = client.post("/notes/", json={"title": "Valid title", "content": ""})
     assert r.status_code == 422
+    assert r.json()["ok"] is False
 
 
 def test_update_note_with_empty_title_returns_422(client):
     """PUT /notes/{id} with an empty title is rejected with 422."""
     r = client.post("/notes/", json={"title": "Original", "content": "content"})
-    note_id = r.json()["id"]
+    note_id = r.json()["data"]["id"]
     r = client.put(f"/notes/{note_id}", json={"title": "", "content": "content"})
     assert r.status_code == 422
+    assert r.json()["ok"] is False
 
 
 def test_update_note_with_title_too_long_returns_422(client):
     """PUT /notes/{id} with a title exceeding 200 characters is rejected with 422."""
     r = client.post("/notes/", json={"title": "Original", "content": "content"})
-    note_id = r.json()["id"]
+    note_id = r.json()["data"]["id"]
     r = client.put(f"/notes/{note_id}", json={"title": "x" * 201, "content": "content"})
     assert r.status_code == 422
+    assert r.json()["ok"] is False
 
 
 def test_update_note_with_empty_content_returns_422(client):
     """PUT /notes/{id} with empty content is rejected with 422."""
     r = client.post("/notes/", json={"title": "Original", "content": "content"})
-    note_id = r.json()["id"]
+    note_id = r.json()["data"]["id"]
     r = client.put(f"/notes/{note_id}", json={"title": "Original", "content": ""})
     assert r.status_code == 422
+    assert r.json()["ok"] is False
