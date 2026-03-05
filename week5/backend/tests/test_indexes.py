@@ -2,7 +2,6 @@
 
 from sqlalchemy import text
 
-
 # ---------------------------------------------------------------------------
 # Schema inspection helpers
 # ---------------------------------------------------------------------------
@@ -32,17 +31,15 @@ def test_notes_title_index_exists(db_engine):
 def test_action_items_completed_index_exists(db_engine):
     """action_items.completed must be indexed to speed up completed=true/false filters."""
     names = _index_names(db_engine, "action_items")
-    assert any("completed" in n for n in names), (
-        f"No completed index found on action_items; got {names}"
-    )
+    assert any(
+        "completed" in n for n in names
+    ), f"No completed index found on action_items; got {names}"
 
 
 def test_note_tags_tag_id_index_exists(db_engine):
     """note_tags.tag_id must have its own index for efficient 'notes by tag' joins."""
     names = _index_names(db_engine, "note_tags")
-    assert any("tag_id" in n for n in names), (
-        f"No tag_id index found on note_tags; got {names}"
-    )
+    assert any("tag_id" in n for n in names), f"No tag_id index found on note_tags; got {names}"
 
 
 # ---------------------------------------------------------------------------

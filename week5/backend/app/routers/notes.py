@@ -122,9 +122,7 @@ def detach_tag(note_id: int, tag_id: int, db: Session = Depends(get_db)) -> JSON
 
 
 @router.post("/{note_id}/extract")
-def extract_note(
-    note_id: int, apply: bool = False, db: Session = Depends(get_db)
-) -> JSONResponse:
+def extract_note(note_id: int, apply: bool = False, db: Session = Depends(get_db)) -> JSONResponse:
     note = db.get(Note, note_id)
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")

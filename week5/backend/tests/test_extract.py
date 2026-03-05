@@ -72,9 +72,9 @@ def test_extract_endpoint_apply_false_does_not_persist(client):
 
 
 def test_extract_endpoint_apply_true_persists_tags_and_actions(client):
-    note_id = client.post(
-        "/notes/", json={"title": "T", "content": "#mytag - [ ] my task"}
-    ).json()["data"]["id"]
+    note_id = client.post("/notes/", json={"title": "T", "content": "#mytag - [ ] my task"}).json()[
+        "data"
+    ]["id"]
     r = client.post(f"/notes/{note_id}/extract", params={"apply": "true"})
     assert r.status_code == 200
     note = client.get(f"/notes/{note_id}").json()["data"]
@@ -86,9 +86,9 @@ def test_extract_endpoint_apply_true_persists_tags_and_actions(client):
 
 def test_extract_endpoint_apply_true_idempotent_tag(client):
     """Applying extraction twice does not duplicate the tag on the note."""
-    note_id = client.post(
-        "/notes/", json={"title": "T", "content": "#idempotent"}
-    ).json()["data"]["id"]
+    note_id = client.post("/notes/", json={"title": "T", "content": "#idempotent"}).json()["data"][
+        "id"
+    ]
     client.post(f"/notes/{note_id}/extract", params={"apply": "true"})
     client.post(f"/notes/{note_id}/extract", params={"apply": "true"})
     note = client.get(f"/notes/{note_id}").json()["data"]
