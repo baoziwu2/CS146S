@@ -47,12 +47,11 @@ This is a FastAPI + SQLite full-stack app with a static vanilla-JS frontend.
 **Strictly follow** this TDD process for every task — do not skip or reorder steps.
 
 1. Read `docs/TASKS.md`; ask the user to clarify anything ambiguous before proceeding.
-2. Write a design doc following the template in `templete_doc.md`. **Stop and wait for user approval** before writing any code.
-3. Once approved, write tests based on expected inputs/outputs. Explicitly state you are doing TDD to prevent generating mock implementations.
-4. Run the tests and confirm they **fail**. Do not write any implementation code at this point.
-5. Commit the failing tests.
-6. Write implementation code to make the tests pass. **Do not modify the tests** — iterate on the implementation only until tests pass.
-7. Use a sub-agent to validate that the implementation is not overfit to the tests.
+2. Write tests based on expected inputs/outputs. Explicitly state you are doing TDD to prevent generating mock implementations.
+3. Run the tests and confirm they **fail**. Do not write any implementation code at this point.
+4. Commit the failing tests.
+5. Write implementation code to make the tests pass. **Do not modify the tests** — iterate on the implementation only until tests pass.
+6. Use a sub-agent to validate that the implementation is not overfit to the tests.
 8. Commit the implementation.
 
 ## Conventions
